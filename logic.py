@@ -1,60 +1,46 @@
-# logic.py
-
 import json
-import os
+import uuid
+from datetime import datetime
+from pathlib import Path
 
-MEMORY_FILE = "memory.json"
-
-
-# ---------- práce se souborem ----------
-
-def load_memory():
-    if os.path.exists(MEMORY_FILE):
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"messages": []}
+MEMORY_FILE = Path("memory.json")
 
 
-def save_memory(memory: dict):
+def _load_memory():
+    if not MEMORY_FILE.exists():
+        return {"messages": []}
+
+    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _save_memory(data):
     with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(memory, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-# ---------- inicializace paměti ----------
+def save_message(text: str, session: str = "default"):
+    data = _load_memory()
 
-memory = load_memory()
-
-
-# ---------- hlavní logika ----------
-
-def handle_message(text: str) -> dict:
-    memory["messages"].append(text)
-    save_memory(memory)
-
-    text_lower = text.lower()
-
-    if any(word in text_lower for word in ["ahoj", "čau", "nazdar"]):
-        reply = "Ahoj! Rád tě vidím 🙂"
-    elif "jak se máš" in text_lower:
-        reply = "Mám se fajn, díky! A ty?"
-    elif len(memory["messages"]) == 1:
-        reply = "To je naše první zpráva 🙂"
-    else:
-        reply = f"Rozumím. Toto je zpráva číslo {len(memory['messages'])}."
-
-    return {
-        "reply": reply,
-        "count": len(memory["messages"])
+    message = {
+        "id": str(uuid.uuid4()),
+        "role": "user",
+        "content": text,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "tags": ["input"],
+        "session": session
     }
 
+    data["messages"].append(message)
+    _save_memory(data)
 
-# ---------- pomocné endpointy ----------
+    return message
 
-def get_history():
-    return memory["messages"]
+
+def read_messages(session: str = "default"):
+    data = _load_memory()
+    return [m for m in data["messages"] if m.get("session") == session]
 
 
 def clear_memory():
-    memory["messages"].clear()
-    save_memory(memory)
-
+    _save_memory({"messages": []})
