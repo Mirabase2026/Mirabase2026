@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Header, HTTPException, Depends
-from logic import handle_message, get_history, clear_memory
+from logic import save_message, read_messages, clear_memory
 
-app = FastAPI()
+app = FastAPI(title="Mirabase2026")
 
 API_KEY = "mirabase"
 
@@ -31,13 +31,16 @@ def echo(
     data: dict,
     _: None = Depends(check_api_key)
 ):
-    text = data["text"]
-    result = handle_message(text)
+    text = data.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing 'text' field")
+
+    message = save_message(text)
 
     return {
         "you_sent": text,
-        "reply": result["reply"],
-        "count": result["count"]
+        "stored_id": message["id"],
+        "timestamp": message["timestamp"]
     }
 
 
@@ -46,7 +49,7 @@ def history(
     _: None = Depends(check_api_key)
 ):
     return {
-        "messages": get_history()
+        "messages": read_messages()
     }
 
 
@@ -55,5 +58,6 @@ def memory_clear(
     _: None = Depends(check_api_key)
 ):
     clear_memory()
-    return {"status": "cleared", "count": 0}
+    return {"status": "cleared"}
+
 
