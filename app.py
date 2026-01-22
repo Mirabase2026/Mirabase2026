@@ -18,22 +18,21 @@ def ping():
 @app.post("/echo")
 def echo(data: dict):
     text = data["text"]
-    memory["messages"].append(text)
-@app.post("/echo")
-def echo(data: dict):
-    text = data["text"]
-    memory["messages"].append(text)
+  text = data["text"]
+memory["messages"].append(text)
 
-    text_lower = text.lower()
+text_lower = text.lower()
 
-    if any(word in text_lower for word in ["ahoj", "čau", "nazdar"]):
-        reply = "Ahoj! Rád tě vidím 🙂"
-    elif "jak se máš" in text_lower:
-        reply = "Mám se fajn, díky! A ty?"
-    elif len(memory["messages"]) == 1:
-        reply = "To je naše první zpráva 🙂"
-    else:
-        reply = f"Rozumím. Toto je zpráva číslo {len(memory['messages'])}."
+if any(word in text_lower for word in ["ahoj", "čau", "nazdar"]):
+    reply = "Ahoj! Rád tě vidím 🙂"
+elif "jak se máš" in text_lower:
+    reply = "Mám se fajn, díky! A ty?"
+elif len(memory["messages"]) == 1:
+    reply = "To je naše první zpráva 🙂"
+else:
+    reply = f"Rozumím. Toto je zpráva číslo {len(memory['messages'])}."
+
+
 
     return {
         "you_sent": text,
