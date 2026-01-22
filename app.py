@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+memory = {}
 
 app = FastAPI()
 
@@ -12,11 +13,12 @@ def healthz():
 @app.get("/ping")
 def ping():
     return {"ping": "pong"}
-from pydantic import BaseModel
 
-class Echo(BaseModel):
-    text: str
 
-@app.post("/echo")
-def echo(data: Echo):
-    return {"you_sent": data.text}
+@ app.post("/echo")
+def echo(data: dict):
+    memory["last"] = data["text"]
+    return {"you_sent": data["text"]}
+@ app.get("/last")
+def last():
+    return {"last_message": memory.get("last")}
