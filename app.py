@@ -41,8 +41,6 @@ def echo(data: dict):
         "count": len(memory["messages"])
     }
 
-        return {"last_message": None}
-    return {"last_message": memory["messages"][-1]}
 
 @app.get("/history")
 def history():
