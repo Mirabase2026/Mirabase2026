@@ -2,8 +2,6 @@ from fastapi import FastAPI
 memory = {
     "messages": []
 }
-
-
 app = FastAPI()
 
 @app.get("/")
@@ -16,7 +14,6 @@ def healthz():
 @app.get("/ping")
 def ping():
     return {"ping": "pong"}
-
 
 @app.post("/echo")
 def echo(data: dict):
@@ -34,15 +31,11 @@ elif len(memory["messages"]) == 1:
 else:
     reply = f"Rozumím. Toto je zpráva číslo {len(memory['messages'])}."
 
-
     return {
         "you_sent": text,
         "reply": reply,
         "count": len(memory["messages"])
     }
-
- 
-
 
 @app.get("/last")
 def last():
