@@ -64,20 +64,14 @@ def mark_long(
     with open(MEMORY_FILE, "r", encoding="utf-8") as f:
         mem = json.load(f)
 
-    found = False
     for m in mem["messages"]:
         if m["id"] == message_id:
             m["memory_type"] = "long"
-            found = True
-            break
+            with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+                json.dump(mem, f, indent=2, ensure_ascii=False)
+            return {"status": "ok", "id": message_id}
 
-    if not found:
-        raise HTTPException(status_code=404, detail="Message not found")
-
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(mem, f, indent=2, ensure_ascii=False)
-
-    return {"status": "ok", "id": message_id, "memory_type": "long"}
+    raise HTTPException(status_code=404, detail="Message not found")
 
 
 @app.post("/memory/clear")
@@ -86,6 +80,4 @@ def memory_clear(
 ):
     clear_memory()
     return {"status": "cleared"}
-
-
 
