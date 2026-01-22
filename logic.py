@@ -19,21 +19,19 @@ def _save_memory(data):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def save_message(text: str, session: str = "default"):
+def save_message(role: str, text: str, session: str = "default"):
     data = _load_memory()
 
     message = {
         "id": str(uuid.uuid4()),
-        "role": "user",
+        "role": role,              # "user" nebo "assistant"
         "content": text,
         "timestamp": datetime.utcnow().isoformat() + "Z",
-        "tags": ["input"],
         "session": session
     }
 
     data["messages"].append(message)
     _save_memory(data)
-
     return message
 
 
@@ -44,3 +42,4 @@ def read_messages(session: str = "default"):
 
 def clear_memory():
     _save_memory({"messages": []})
+
