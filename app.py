@@ -34,12 +34,8 @@ def echo(data: dict):
         "count": len(memory["messages"])
     }
 
-    text = data["text"]
-    memory["messages"].append(text)
-    return {
-        "you_sent": text,
-        "count": len(memory["messages"])
-    }
+ 
+
 
 @app.get("/last")
 def last():
