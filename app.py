@@ -35,12 +35,18 @@ def echo(
     if not text:
         raise HTTPException(status_code=400, detail="Missing 'text' field")
 
-    message = save_message(text)
+    # uložíme vstup uživatele
+    save_message("user", text)
+
+    # zatím „hloupá“ odpověď (placeholder)
+    reply = "OK, uloženo."
+
+    # uložíme odpověď AI
+    save_message("assistant", reply)
 
     return {
-        "you_sent": text,
-        "stored_id": message["id"],
-        "timestamp": message["timestamp"]
+        "user": text,
+        "assistant": reply
     }
 
 
@@ -60,5 +66,4 @@ def memory_clear(
     clear_memory()
     return {"status": "cleared"}
 
-# redeploy fix
 
