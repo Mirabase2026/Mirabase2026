@@ -1,5 +1,8 @@
 from fastapi import FastAPI
-memory = {}
+memory = {
+    "messages": []
+}
+
 
 app = FastAPI()
 
@@ -15,10 +18,23 @@ def ping():
     return {"ping": "pong"}
 
 
-@ app.post("/echo")
+@app.post("/echo")
 def echo(data: dict):
-    memory["last"] = data["text"]
-    return {"you_sent": data["text"]}
-@ app.get("/last")
+    text = data["text"]
+    memory["messages"].append(text)
+    return {
+        "you_sent": text,
+        "count": len(memory["messages"])
+    }
+
+@app.get("/last")
 def last():
-    return {"last_message": memory.get("last")}
+    if not memory["messages"]:
+        return {"last_message": None}
+    return {"last_message": memory["messages"][-1]}
+
+@app.get("/history")
+def history():
+    return {
+        "messages": memory["messages"]
+    }
