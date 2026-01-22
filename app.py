@@ -81,3 +81,10 @@ def memory_clear(
     clear_memory()
     return {"status": "cleared"}
 
+@app.get("/memory/long")
+def get_long_memory(
+    _: None = Depends(check_api_key)
+):
+    messages = read_messages()
+    long_messages = [m for m in messages if m.get("memory_type") == "long"]
+    return {"messages": long_messages}
