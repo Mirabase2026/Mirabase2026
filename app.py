@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-memory = {
-    "messages": []
-}
+from logic import handle_message, get_history, clear_memory
+
+
 app = FastAPI()
 
 @app.get("/")
@@ -18,32 +18,20 @@ def ping():
 @app.post("/echo")
 def echo(data: dict):
     text = data["text"]
-
-    memory["messages"].append(text)
-    text_lower = text.lower()
-
-    if any(word in text_lower for word in ["ahoj", "čau", "nazdar"]):
-        reply = "Ahoj! Rád tě vidím 🙂"
-    elif "jak se máš" in text_lower:
-        reply = "Mám se fajn, díky! A ty?"
-    elif len(memory["messages"]) == 1:
-        reply = "To je naše první zpráva 🙂"
-    else:
-        reply = f"Rozumím. Toto je zpráva číslo {len(memory['messages'])}."
+    result = handle_message(text)
 
     return {
         "you_sent": text,
-        "reply": reply,
-        "count": len(memory["messages"])
+        "reply": result["reply"],
+        "count": result["count"]
     }
-
-
 @app.get("/history")
 def history():
     return {
-        "messages": memory["messages"]
+        "messages": get_history()
     }
 @app.post("/memory/clear")
-def clear_memory():
-    memory["messages"].clear()
+def memory_clear():
+    clear_memory()
     return {"status": "cleared", "count": 0}
+
