@@ -43,3 +43,7 @@ def history():
     return {
         "messages": memory["messages"]
     }
+@app.post("/memory/clear")
+def clear_memory():
+    memory["messages"].clear()
+    return {"status": "cleared", "count": 0}
