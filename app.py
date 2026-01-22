@@ -73,6 +73,29 @@ def mark_long(
 
     raise HTTPException(status_code=404, detail="Message not found")
 
+@app.post("/memory/note")
+def add_note(
+    data: dict,
+    _: None = Depends(check_api_key)
+):
+    text = data.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing 'text' field")
+
+    # uložíme poznámku rovnou jako long-term
+    save_message("assistant", text)
+    
+    # přepíšeme poslední zprávu na long
+    messages = read_messages()
+    messages[-1]["memory_type"] = "long"
+
+    # zapíšeme zpět
+    from pathlib import Path
+    import json
+    with open(Path("memory.json"), "w", encoding="utf-8") as f:
+        json.dump({"messages": messages}, f, indent=2, ensure_ascii=False)
+
+    return {"status": "ok", "stored_as": "long"}
 
 @app.post("/memory/clear")
 def memory_clear(
