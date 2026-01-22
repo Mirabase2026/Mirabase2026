@@ -1,8 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from logic import handle_message, get_history, clear_memory
 
 
 app = FastAPI()
+API_KEY = "mirabase"
+
+def check_api_key(x_api_key: str = Header(None)):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
 @app.get("/")
 def root():
@@ -16,7 +21,9 @@ def ping():
     return {"ping": "pong"}
 
 @app.post("/echo")
-def echo(data: dict):
+def echo(data: dict, x_api_key: str = Header(None)):
+    check_api_key(x_api_key)
+
     text = data["text"]
     result = handle_message(text)
 
@@ -26,12 +33,16 @@ def echo(data: dict):
         "count": result["count"]
     }
 @app.get("/history")
-def history():
+def history(x_api_key: str = Header(None)):
+    check_api_key(x_api_key)
+
     return {
         "messages": get_history()
     }
 @app.post("/memory/clear")
-def memory_clear():
+def memory_clear(x_api_key: str = Header(None)):
+    check_api_key(x_api_key)
+
     clear_memory()
     return {"status": "cleared", "count": 0}
 
