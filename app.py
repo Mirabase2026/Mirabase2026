@@ -22,6 +22,20 @@ def ping():
 def echo(data: dict):
     text = data["text"]
     memory["messages"].append(text)
+
+    if len(memory["messages"]) == 1:
+        reply = "Ahoj! To je naše první zpráva 🙂"
+    else:
+        reply = f"Už jsme si psali. Toto je zpráva číslo {len(memory['messages'])}."
+
+    return {
+        "you_sent": text,
+        "reply": reply,
+        "count": len(memory["messages"])
+    }
+
+    text = data["text"]
+    memory["messages"].append(text)
     return {
         "you_sent": text,
         "count": len(memory["messages"])
