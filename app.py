@@ -1,9 +1,12 @@
 from fastapi import FastAPI, Header, HTTPException, Depends
 from logic import save_message, read_messages, clear_memory
+import json
+from pathlib import Path
 
 app = FastAPI(title="Mirabase2026")
 
 API_KEY = "mirabase"
+MEMORY_FILE = Path("memory.json")
 
 
 def check_api_key(x_api_key: str = Header(None)):
@@ -35,28 +38,46 @@ def echo(
     if not text:
         raise HTTPException(status_code=400, detail="Missing 'text' field")
 
-    # uložíme vstup uživatele
     save_message("user", text)
-
-    # zatím „hloupá“ odpověď (placeholder)
     reply = "OK, uloženo."
-
-    # uložíme odpověď AI
     save_message("assistant", reply)
 
-    return {
-        "user": text,
-        "assistant": reply
-    }
+    return {"user": text, "assistant": reply}
 
 
 @app.get("/history")
 def history(
     _: None = Depends(check_api_key)
 ):
-    return {
-        "messages": read_messages()
-    }
+    return {"messages": read_messages()}
+
+
+@app.post("/memory/mark_long")
+def mark_long(
+    data: dict,
+    _: None = Depends(check_api_key)
+):
+    message_id = data.get("id")
+    if not message_id:
+        raise HTTPException(status_code=400, detail="Missing 'id'")
+
+    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
+        mem = json.load(f)
+
+    found = False
+    for m in mem["messages"]:
+        if m["id"] == message_id:
+            m["memory_type"] = "long"
+            found = True
+            break
+
+    if not found:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(mem, f, indent=2, ensure_ascii=False)
+
+    return {"status": "ok", "id": message_id, "memory_type": "long"}
 
 
 @app.post("/memory/clear")
@@ -65,5 +86,6 @@ def memory_clear(
 ):
     clear_memory()
     return {"status": "cleared"}
+
 
 
