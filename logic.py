@@ -22,13 +22,14 @@ def _save_memory(data):
 def save_message(role: str, text: str, session: str = "default"):
     data = _load_memory()
 
-    message = {
-        "id": str(uuid.uuid4()),
-        "role": role,              # "user" nebo "assistant"
-        "content": text,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "session": session
-    }
+   message = {
+    "id": str(uuid.uuid4()),
+    "role": role,
+    "content": text,
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+    "session": session,
+    "memory_type": "short"
+}
 
     data["messages"].append(message)
     _save_memory(data)
