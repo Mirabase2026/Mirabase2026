@@ -12,3 +12,11 @@ def healthz():
 @app.get("/ping")
 def ping():
     return {"ping": "pong"}
+from pydantic import BaseModel
+
+class Echo(BaseModel):
+    text: str
+
+@app.post("/echo")
+def echo(data: Echo):
+    return {"you_sent": data.text}
