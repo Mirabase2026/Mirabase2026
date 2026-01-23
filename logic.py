@@ -89,6 +89,12 @@ def run_pipeline(
 
         if behavior.get("action") == "INTENT":
             routed = route_intent(behavior.get("intent"))
+if routed and routed.get("next") == "OPINION_ENGINE":
+    engine_result = run_opinion_engine({
+        "intent": behavior.get("intent"),
+        "text": user_text,
+    })
+    behavior["response"] = engine_result.get("response")
 
         return {
             "response": behavior.get("response"),
