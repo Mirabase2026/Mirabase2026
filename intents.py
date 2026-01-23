@@ -26,8 +26,9 @@ def handle(user_input: str):
     for pattern, intent in INTENT_RULES:
         if re.match(pattern, text):
             return {
-                "action": intent,
-                "response": None,
-                "source": "intent"
-            }
-    return None
+    "action": "INTENT",
+    "intent": intent,
+    "response": None,
+    "source": "intent"
+}
+
