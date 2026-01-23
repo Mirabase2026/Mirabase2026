@@ -82,14 +82,15 @@ def run_pipeline(
     - čistě decision-driven
     """
     # 0) BEHAVIOR (reflex / social / intent)
-behavior = behavior_route(user_text)
-if behavior is not None:
-    return {
-        "action": behavior["action"],
-        "response": behavior.get("response"),
-        "source": behavior.get("source"),
-        "pipeline": "BEHAVIOR",
-    }
+    behavior = behavior_route(user_text)
+    if behavior is not None:
+        return {
+            "action": behavior["action"],
+            "response": behavior.get("response"),
+            "source": behavior.get("source"),
+            "pipeline": "BEHAVIOR",
+        }
+
 
 
     error = None
