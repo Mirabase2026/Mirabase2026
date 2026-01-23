@@ -80,6 +80,16 @@ def run_pipeline(
     - žádný planner
     - čistě decision-driven
     """
+    # 0) BEHAVIOR ROUTER (reflex / social / intent)
+    behavior = behavior_route(user_text)
+    if behavior:
+        return {
+            "input": user_text,
+            "decision": behavior["action"],
+            "response": behavior.get("response"),
+            "source": behavior["source"],
+            "pipeline": "BEHAVIOR",
+        }
 
     error = None
     response = None
