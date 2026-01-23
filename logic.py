@@ -4,10 +4,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
-from opinion_engine import run as run_opinion_engine
 
 from behavior import route as behavior_route
 from intent_router import route_intent
+from opinion_engine import run as run_opinion_engine
 
 from decision import (
     decide,
@@ -27,7 +27,7 @@ MEMORY_FILE = Path("memory.json")
 EXECUTION_LOG_FILE = Path("execution_log.jsonl")
 
 # =========================
-# MEMORY (LOW LEVEL)
+# MEMORY
 # =========================
 
 def save_message(role: str, content: str):
@@ -72,7 +72,7 @@ def log_step(action: str, status: str, details: Dict | None = None):
 
 
 # =========================
-# PIPELINE (BRAIN)
+# PIPELINE
 # =========================
 
 def run_pipeline(
@@ -89,12 +89,13 @@ def run_pipeline(
 
         if behavior.get("action") == "INTENT":
             routed = route_intent(behavior.get("intent"))
-if routed and routed.get("next") == "OPINION_ENGINE":
-    engine_result = run_opinion_engine({
-        "intent": behavior.get("intent"),
-        "text": user_text,
-    })
-    behavior["response"] = engine_result.get("response")
+
+            if routed and routed.get("next") == "OPINION_ENGINE":
+                engine_result = run_opinion_engine({
+                    "intent": behavior.get("intent"),
+                    "text": user_text,
+                })
+                behavior["response"] = engine_result.get("response")
 
         return {
             "response": behavior.get("response"),
@@ -110,9 +111,9 @@ if routed and routed.get("next") == "OPINION_ENGINE":
             "pipeline": "BEHAVIOR",
         }
 
-    # -------------------------
+    # =====================
     # DECISION LAYER
-    # -------------------------
+    # =====================
 
     error = None
     response = None
@@ -176,4 +177,3 @@ if routed and routed.get("next") == "OPINION_ENGINE":
 def clear_memory():
     with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
-
