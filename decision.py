@@ -1,4 +1,9 @@
-from typing import List, Dict
+from dataclasses import dataclass
+from typing import List, Dict, Optional
+
+# =========================
+# AKCE (zatím zachováváme)
+# =========================
 
 Action = str
 
@@ -9,34 +14,73 @@ STORE_LONG: Action = "store_long"
 DO_NOTHING: Action = "do_nothing"
 
 
+# =========================
+# STRUKTUROVANÝ VÝSTUP
+# =========================
+
+@dataclass
+class DecisionResult:
+    """
+    Výsledek rozhodování mozku.
+    action:
+        - respond
+        - verify
+        - summarize
+        - store_long
+        - do_nothing
+    reflex_type:
+        - None (zatím)
+    memory_action:
+        - None (zatím)
+    """
+    action: Action
+    reflex_type: Optional[str] = None
+    memory_action: Optional[str] = None
+
+
+# =========================
+# HLAVNÍ ROZHODOVÁNÍ
+# =========================
+
 def decide(
     user_text: str,
     recent_messages: List[Dict]
-) -> Action:
+) -> DecisionResult:
     """
-    Jednoduchá rozhodovací logika (bez AI).
+    Rozhodovací logika v1.1
+    - BEZ AI
+    - deterministická
+    - připravená na NO_ACTION / reflexy / paměť
     """
 
-    text = user_text.lower()
+    if not user_text:
+        return DecisionResult(action=DO_NOTHING)
 
-    # 1) Pokud uživatel výslovně žádá shrnutí
+    text = user_text.lower().strip()
+
+    # 1) Výslovná žádost o shrnutí
     if "shrň" in text or "shrnutí" in text:
-        return SUMMARIZE
+        return DecisionResult(action=SUMMARIZE)
 
-    # 2) Pokud se ptá na fakta / čísla / zdroje
+    # 2) Dotazy na fakta / ověřování
     if any(word in text for word in ["kolik", "kdy", "proč", "zdroj", "pravda"]):
-        return VERIFY
+        return DecisionResult(action=VERIFY)
 
-    # 3) Pokud se něco opakuje (už to padlo nedávno)
+    # 3) Opakování (už to padlo nedávno) → mlčet
     recent_contents = " ".join(
         m.get("content", "").lower() for m in recent_messages[-5:]
     )
     if text and text in recent_contents:
-        return DO_NOTHING
+        return DecisionResult(action=DO_NOTHING)
 
-    # 4) Pokud to zní osobně nebo dlouhodobě
+    # 4) Potenciálně dlouhodobé / osobní sdělení
+    # (zatím jen značíme – skutečné ukládání přijde později)
     if any(word in text for word in ["chci", "plán", "cíl", "budu", "dlouhodobě"]):
-        return STORE_LONG
+        return DecisionResult(
+            action=RESPOND,
+            memory_action=STORE_LONG  # zatím jen signál
+        )
 
-    # Default
-    return RESPOND
+    # 5) Default: odpovědět
+    return DecisionResult(action=RESPOND)
+
