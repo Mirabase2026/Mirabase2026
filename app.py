@@ -1,9 +1,19 @@
 from fastapi import FastAPI, Header, HTTPException, Depends
 from pydantic import BaseModel
-from logic import save_message, read_messages, clear_memory
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 import json
 import os
+
+from logic import save_message, read_messages, clear_memory
+from decision import (
+    decide,
+    RESPOND,
+    VERIFY,
+    SUMMARIZE,
+    STORE_LONG,
+    DO_NOTHING,
+)
 
 app = FastAPI(title="Mirabase2026")
 
@@ -18,7 +28,7 @@ if not API_KEY:
 MEMORY_FILE = Path("memory.json")
 
 # =========================
-# Pydantic modely
+# PYDANTIC MODELY
 # =========================
 
 class TextRequest(BaseModel):
@@ -30,7 +40,7 @@ class IdRequest(BaseModel):
 
 
 # =========================
-# Zabezpečení
+# ZABEZPEČENÍ
 # =========================
 
 def check_api_key(x_api_key: str = Header(None)):
@@ -51,7 +61,15 @@ def root():
 def healthz():
     return {"status": "healthy"}
 
-from datetime import datetime
+
+@app.get("/ping")
+def ping():
+    return {"ping": "pong"}
+
+
+# =========================
+# DASHBOARD
+# =========================
 
 @app.get("/dashboard")
 def dashboard(
@@ -72,7 +90,7 @@ def dashboard(
         ):
             last_summary = {
                 "timestamp": m.get("timestamp"),
-                "preview": m["content"][:120]
+                "preview": m["content"][:120],
             }
             break
 
@@ -83,16 +101,12 @@ def dashboard(
             "short": short_count,
             "long": long_count,
         },
-        "last_summary": last_summary
+        "last_summary": last_summary,
     }
-
-@app.get("/ping")
-def ping():
-    return {"ping": "pong"}
 
 
 # =========================
-# PAMĚŤ
+# PAMĚŤ / ECHO (Decision Layer)
 # =========================
 
 @app.post("/echo")
@@ -100,14 +114,28 @@ def echo(
     data: TextRequest,
     _: None = Depends(check_api_key)
 ):
+    # uložíme vstup
     save_message("user", data.text)
 
-    reply = "OK, uloženo."
+    messages = read_messages()
+    action = decide(data.text, messages)
+
+    if action == DO_NOTHING:
+        reply = "Tohle už jsme řešili."
+    elif action == SUMMARIZE:
+        reply = "Rozumím, připravím shrnutí."
+    elif action == VERIFY:
+        reply = "Tohle si raději ověřím."
+    elif action == STORE_LONG:
+        reply = "Tohle si zapamatuji."
+    else:
+        reply = "OK."
+
     save_message("assistant", reply)
 
     return {
-        "user": data.text,
-        "assistant": reply
+        "action": action,
+        "assistant": reply,
     }
 
 
@@ -117,6 +145,10 @@ def history(
 ):
     return {"messages": read_messages()}
 
+
+# =========================
+# PAMĚŤ – LONG / SHORT
+# =========================
 
 @app.post("/memory/mark_long")
 def mark_long(
@@ -144,36 +176,35 @@ def get_long_memory(
     long_messages = [m for m in messages if m.get("memory_type") == "long"]
     return {"messages": long_messages}
 
+
+# =========================
+# SHRNUTÍ
+# =========================
+
 @app.post("/memory/summarize")
 def summarize_memory(
     _: None = Depends(check_api_key)
 ):
     messages = read_messages()
-
-    # vezmeme posledních 10 zpráv
     last_messages = messages[-10:]
 
     if not last_messages:
         raise HTTPException(status_code=400, detail="No messages to summarize")
 
-    # jednoduché „shrnutí“ – jen slepený text
     summary_text = " | ".join(
         f"{m['role']}: {m['content']}" for m in last_messages
     )
 
-    # uložíme jako long-term poznámku
     save_message("assistant", f"SHRNUTÍ: {summary_text}")
 
-    # označíme poslední zprávu jako long
     messages = read_messages()
     messages[-1]["memory_type"] = "long"
 
-    from pathlib import Path
-    import json
-    with open(Path("memory.json"), "w", encoding="utf-8") as f:
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump({"messages": messages}, f, indent=2, ensure_ascii=False)
 
     return {"status": "ok", "summarized_messages": len(last_messages)}
+
 
 @app.post("/memory/note")
 def add_note(
@@ -190,7 +221,10 @@ def add_note(
 
     return {"status": "ok", "stored_as": "long"}
 
-from datetime import datetime, timezone, timedelta
+
+# =========================
+# ÚKLID PAMĚTI
+# =========================
 
 @app.post("/memory/cleanup")
 def cleanup_memory(
@@ -227,13 +261,15 @@ def cleanup_memory(
         else:
             deleted += 1
 
-    # zapiš zpět
-    import json
-    from pathlib import Path
-    with open(Path("memory.json"), "w", encoding="utf-8") as f:
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump({"messages": kept}, f, indent=2, ensure_ascii=False)
 
     return {"status": "ok", "deleted": deleted}
+
+
+# =========================
+# CLEAR
+# =========================
 
 @app.post("/memory/clear")
 def memory_clear(
@@ -241,4 +277,5 @@ def memory_clear(
 ):
     clear_memory()
     return {"status": "cleared"}
+
 
