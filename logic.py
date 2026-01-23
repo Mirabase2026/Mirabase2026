@@ -165,5 +165,16 @@ def run_pipeline(user_text: str):
 
     return final_reply or "Došlo k chybě."
 
+# =========================
+# CLEAR MEMORY
+# =========================
+def clear_memory():
+    from pathlib import Path
+    import json
+
+    memory_file = Path("memory.json")
+
+    with open(memory_file, "w", encoding="utf-8") as f:
+        json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
 
 
