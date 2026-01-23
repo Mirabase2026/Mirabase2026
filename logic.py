@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
+from opinion_engine import run as run_opinion_engine
 
 from behavior import route as behavior_route
 from intent_router import route_intent
