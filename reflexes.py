@@ -1,9 +1,11 @@
 # reflexes.py
-
 import re
 
 def normalize(text: str) -> str:
-    return re.sub(r"\s+", " ", text.strip().lower())
+    text = text.lower().strip()
+    text = re.sub(r"[?!.,]", "", text)
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 REFLEX_RULES = [
     {
@@ -19,7 +21,6 @@ REFLEX_RULES = [
         "response": "Není zač."
     }
 ]
-
 
 def handle(user_input: str):
     text = normalize(user_input)
