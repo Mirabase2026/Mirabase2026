@@ -4,12 +4,13 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
-from explain_engine import run as run_explain_engine
-from note_engine import run as run_note_engine
 
 from behavior import route as behavior_route
 from intent_router import route_intent
+
 from opinion_engine import run as run_opinion_engine
+from explain_engine import run as run_explain_engine
+from note_engine import run as run_note_engine
 
 from decision import (
     decide,
@@ -92,24 +93,23 @@ def run_pipeline(
         if behavior.get("action") == "INTENT":
             routed = route_intent(behavior.get("intent"))
 
-            if routed and routed.get("next") == "OPINION_ENGINE":
-                engine_result = run_opinion_engine({
+            if routed:
+                engine_context = {
                     "intent": behavior.get("intent"),
                     "text": user_text,
-                })
-                behavior["response"] = engine_result.get("response")
-    if routed and routed.get("next") == "EXPLAIN_ENGINE":
-        engine_result = run_explain_engine({
-            "intent": behavior.get("intent"),
-            "text": user_text,
-        })
-        behavior["response"] = engine_result.get("response")
-if routed and routed.get("next") == "NOTE_ENGINE":
-    engine_result = run_note_engine({
-        "intent": behavior.get("intent"),
-        "text": user_text,
-    })
-    behavior["response"] = engine_result.get("response")
+                }
+
+                if routed.get("next") == "OPINION_ENGINE":
+                    result = run_opinion_engine(engine_context)
+                    behavior["response"] = result.get("response")
+
+                elif routed.get("next") == "EXPLAIN_ENGINE":
+                    result = run_explain_engine(engine_context)
+                    behavior["response"] = result.get("response")
+
+                elif routed.get("next") == "NOTE_ENGINE":
+                    result = run_note_engine(engine_context)
+                    behavior["response"] = result.get("response")
 
         return {
             "response": behavior.get("response"),
