@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
+
 from behavior import route as behavior_route
 
 from decision import (
@@ -51,6 +52,7 @@ def read_messages():
     with open(MEMORY_FILE, "r", encoding="utf-8") as f:
         return json.load(f).get("messages", [])
 
+
 # =========================
 # EXECUTION LOG (AUDIT)
 # =========================
@@ -65,6 +67,7 @@ def log_step(action: str, status: str, details: Dict | None = None):
 
     with open(EXECUTION_LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
 
 # =========================
 # PIPELINE (MOZEK v2)
@@ -81,21 +84,29 @@ def run_pipeline(
     - žádný planner
     - čistě decision-driven
     """
+
     # 0) BEHAVIOR (reflex / social / intent)
     behavior = behavior_route(user_text)
     if behavior is not None:
+        # Behavior MUSÍ ukončit pipeline
         return {
-            "action": behavior["action"],
             "response": behavior.get("response"),
-            "source": behavior.get("source"),
+            "decision": {
+                "action": behavior.get("action"),
+                "source": behavior.get("source"),
+            },
+            "memory_read": [],
+            "memory_write": None,
+            "error": None,
             "pipeline": "BEHAVIOR",
         }
 
-
+    # -------------------------
+    # INIT
+    # -------------------------
 
     error = None
     response = None
-
     memory_read = []
     memory_write = None
 
@@ -132,7 +143,6 @@ def run_pipeline(
         memory_write = "short"
 
     elif decision.action == STORE_LONG:
-        # ZATÍM jen značka – skutečné ukládání přijde později
         response = "[ULOŽENÍ DO LONG – zatím pouze kandidát]"
         memory_write = "candidate_long"
 
@@ -151,7 +161,9 @@ def run_pipeline(
         "memory_read": memory_read,
         "memory_write": memory_write,
         "error": error,
+        "pipeline": "DECISION",
     }
+
 
 # =========================
 # CLEAR MEMORY
@@ -160,6 +172,3 @@ def run_pipeline(
 def clear_memory():
     with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
-
-
-
