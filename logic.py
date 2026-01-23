@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
+from intent_router import route_intent
 
 from behavior import route as behavior_route
 
@@ -86,21 +87,27 @@ def run_pipeline(
     """
 
     # 0) BEHAVIOR (reflex / social / intent)
-    behavior = behavior_route(user_text)
-    if behavior is not None:
-        # Behavior MUSÍ ukončit pipeline
-        return {
-    "response": behavior.get("response"),
-    "decision": {
-        "action": behavior.get("action"),
-        "intent": behavior.get("intent"),
-        "source": behavior.get("source"),
-    },
-    "memory_read": [],
-    "memory_write": None,
-    "error": None,
-    "pipeline": "BEHAVIOR",
-}
+behavior = behavior_route(user_text)
+if behavior is not None:
+
+    routed = None
+    if behavior.get("action") == "INTENT":
+        routed = route_intent(behavior.get("intent"))
+
+    return {
+        "response": behavior.get("response"),
+        "decision": {
+            "action": behavior.get("action"),
+            "intent": behavior.get("intent"),
+            "routed": routed,
+            "source": behavior.get("source"),
+        },
+        "memory_read": [],
+        "memory_write": None,
+        "error": None,
+        "pipeline": "BEHAVIOR",
+    }
+
 
 
     # -------------------------
