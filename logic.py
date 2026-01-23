@@ -4,9 +4,9 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
-from intent_router import route_intent
 
 from behavior import route as behavior_route
+from intent_router import route_intent
 
 from decision import (
     decide,
@@ -19,14 +19,14 @@ from decision import (
 )
 
 # =========================
-# CESTY K SOUBORŮM
+# FILE PATHS
 # =========================
 
 MEMORY_FILE = Path("memory.json")
 EXECUTION_LOG_FILE = Path("execution_log.jsonl")
 
 # =========================
-# PAMĚŤ – LOW LEVEL (hloupá)
+# MEMORY (LOW LEVEL)
 # =========================
 
 def save_message(role: str, content: str):
@@ -55,7 +55,7 @@ def read_messages():
 
 
 # =========================
-# EXECUTION LOG (AUDIT)
+# EXECUTION LOG
 # =========================
 
 def log_step(action: str, status: str, details: Dict | None = None):
@@ -71,7 +71,7 @@ def log_step(action: str, status: str, details: Dict | None = None):
 
 
 # =========================
-# PIPELINE (MOZEK v2)
+# PIPELINE (BRAIN)
 # =========================
 
 def run_pipeline(
@@ -79,39 +79,32 @@ def run_pipeline(
     session: str = "cli",
     source: str = "cli"
 ) -> Dict[str, Any]:
-    """
-    Hlavní pipeline:
-    - žádný model
-    - žádný planner
-    - čistě decision-driven
-    """
 
     # 0) BEHAVIOR (reflex / social / intent)
-behavior = behavior_route(user_text)
-if behavior is not None:
+    behavior = behavior_route(user_text)
 
-    routed = None
-    if behavior.get("action") == "INTENT":
-        routed = route_intent(behavior.get("intent"))
+    if behavior is not None:
+        routed = None
 
-    return {
-        "response": behavior.get("response"),
-        "decision": {
-            "action": behavior.get("action"),
-            "intent": behavior.get("intent"),
-            "routed": routed,
-            "source": behavior.get("source"),
-        },
-        "memory_read": [],
-        "memory_write": None,
-        "error": None,
-        "pipeline": "BEHAVIOR",
-    }
+        if behavior.get("action") == "INTENT":
+            routed = route_intent(behavior.get("intent"))
 
-
+        return {
+            "response": behavior.get("response"),
+            "decision": {
+                "action": behavior.get("action"),
+                "intent": behavior.get("intent"),
+                "routed": routed,
+                "source": behavior.get("source"),
+            },
+            "memory_read": [],
+            "memory_write": None,
+            "error": None,
+            "pipeline": "BEHAVIOR",
+        }
 
     # -------------------------
-    # INIT
+    # DECISION LAYER
     # -------------------------
 
     error = None
@@ -119,13 +112,12 @@ if behavior is not None:
     memory_read = []
     memory_write = None
 
-    # 1) Načti paměť (jen krátkou historii)
     recent_messages = read_messages()
     memory_read.append("short")
 
-    # 2) Rozhodnutí mozku
     log_step("DECISION", "start", {"text": user_text})
     decision: DecisionResult = decide(user_text, recent_messages)
+
     log_step(
         "DECISION",
         "ok",
@@ -136,17 +128,14 @@ if behavior is not None:
         }
     )
 
-    # 3) Ulož vstup (jen pokud to dává smysl)
     if decision.action != DO_NOTHING:
         save_message("user", user_text)
         memory_write = "short"
 
-    # 4) Vykonání akce
     if decision.action == DO_NOTHING:
         response = None
 
     elif decision.action in (RESPOND, VERIFY, SUMMARIZE):
-        # ZATÍM žádný model → placeholder
         response = f"[{decision.action.upper()} – odpověď zatím vypnuta]"
         save_message("assistant", response)
         memory_write = "short"
@@ -159,7 +148,6 @@ if behavior is not None:
         error = "unknown_action"
         log_step("PIPELINE", "error", {"error": error})
 
-    # 5) Návrat pro CLI / API
     return {
         "response": response,
         "decision": {
@@ -181,3 +169,4 @@ if behavior is not None:
 def clear_memory():
     with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
+
