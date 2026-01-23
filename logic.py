@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
+from behavior import route as behavior_route
 
 from decision import (
     decide,
