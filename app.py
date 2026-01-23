@@ -156,6 +156,50 @@ def add_note(
 
     return {"status": "ok", "stored_as": "long"}
 
+from datetime import datetime, timezone, timedelta
+
+@app.post("/memory/cleanup")
+def cleanup_memory(
+    days: int = 7,
+    _: None = Depends(check_api_key)
+):
+    messages = read_messages()
+    if not messages:
+        return {"status": "ok", "deleted": 0}
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+    kept = []
+    deleted = 0
+
+    for m in messages:
+        if m.get("memory_type") == "long":
+            kept.append(m)
+            continue
+
+        ts = m.get("timestamp")
+        if not ts:
+            kept.append(m)
+            continue
+
+        try:
+            msg_time = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        except Exception:
+            kept.append(m)
+            continue
+
+        if msg_time >= cutoff:
+            kept.append(m)
+        else:
+            deleted += 1
+
+    # zapiš zpět
+    import json
+    from pathlib import Path
+    with open(Path("memory.json"), "w", encoding="utf-8") as f:
+        json.dump({"messages": kept}, f, indent=2, ensure_ascii=False)
+
+    return {"status": "ok", "deleted": deleted}
 
 @app.post("/memory/clear")
 def memory_clear(
