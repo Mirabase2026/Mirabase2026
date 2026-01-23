@@ -1,37 +1,37 @@
 # intent_router.py
-# Central intent → engine routing
+# Central intent → engine routing (stable)
 
-from explain_engine import run_explain_engine
-from opinion_engine import run_opinion_engine
-from note_engine import run_note_engine
+import explain_engine
+import opinion_engine
+import note_engine
 
 ENGINE_MAP = {
-    "INTENT_EXPLAIN": {
-        "engine": run_explain_engine,
-    },
-    "INTENT_OPINION": {
-        "engine": run_opinion_engine,
-    },
-    "INTENT_NOTE": {
-        "engine": run_note_engine,
-    },
+    "INTENT_EXPLAIN": explain_engine,
+    "INTENT_OPINION": opinion_engine,
+    "INTENT_NOTE": note_engine,
 }
 
 def route_intent(intent: str, text: str) -> dict:
-    config = ENGINE_MAP.get(intent)
+    engine_module = ENGINE_MAP.get(intent)
 
-    if not config:
+    if not engine_module:
         return {
             "response": None,
             "error": "unknown_intent",
             "next": None,
         }
 
-    engine = config["engine"]
-    result = engine(text)
+    if not hasattr(engine_module, "run"):
+        return {
+            "response": None,
+            "error": "engine_has_no_run",
+            "next": engine_module.__name__,
+        }
+
+    response = engine_module.run(text)
 
     return {
-        "next": engine.__name__,
-        "response": result,
+        "next": engine_module.__name__,
+        "response": response,
         "error": None,
     }
