@@ -1,37 +1,33 @@
 # intents.py
 import re
+import unicodedata
 
-def _norm(t: str) -> str:
-    return re.sub(r"\s+", " ", t.strip().lower())
+def normalize(text: str) -> str:
+    text = text.strip().lower()
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = re.sub(r"[?!.,:;\"'()\[\]{}]", "", text)
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 INTENT_RULES = [
-    {
-        "patterns": ["pokračuj", "jdeme dál", "další krok"],
-        "intent": "INTENT_CONTINUE"
-    },
-    {
-        "patterns": ["vysvětli", "vysvětlení", "jak to funguje"],
-        "intent": "INTENT_EXPLAIN"
-    },
-    {
-        "patterns": ["udělej poznámky", "poznamky", "shrň"],
-        "intent": "INTENT_NOTE"
-    },
-    {
-        "patterns": ["navazujeme na", "pokračovací", "fáze"],
-        "intent": "INTENT_CONTEXT"
-    },
+    # explain
+    (r"^(vysvetli|vysvetli to)$", "INTENT_EXPLAIN"),
+    # notes / summarize
+    (r"^(udelej poznamky|shr(n|ň))$", "INTENT_NOTE"),
+    # continue
+    (r"^(pokracuj|jdeme dal)$", "INTENT_CONTINUE"),
+    # opinion
+    (r"^co si myslis( o.*)?$", "INTENT_OPINION"),
 ]
 
 def handle(user_input: str):
-    text = _norm(user_input)
-
-    for rule in INTENT_RULES:
-        for p in rule["patterns"]:
-            if p in text:
-                return {
-                    "action": rule["intent"],
-                    "response": None,
-                    "source": "intent"
-                }
+    text = normalize(user_input)
+    for pattern, intent in INTENT_RULES:
+        if re.match(pattern, text):
+            return {
+                "action": intent,
+                "response": None,
+                "source": "intent"
+            }
     return None
