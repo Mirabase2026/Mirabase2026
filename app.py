@@ -5,15 +5,7 @@ from datetime import datetime, timezone, timedelta
 import json
 import os
 
-from logic import save_message, read_messages, clear_memory
-from decision import (
-    decide,
-    RESPOND,
-    VERIFY,
-    SUMMARIZE,
-    STORE_LONG,
-    DO_NOTHING,
-)
+from logic import save_message, read_messages, clear_memory, run_pipeline
 
 app = FastAPI(title="Mirabase2026")
 
@@ -106,7 +98,7 @@ def dashboard(
 
 
 # =========================
-# PAMĚŤ / ECHO (Decision Layer)
+# ECHO – NOVÝ MOZEK
 # =========================
 
 @app.post("/echo")
@@ -114,28 +106,9 @@ def echo(
     data: TextRequest,
     _: None = Depends(check_api_key)
 ):
-    # uložíme vstup
-    save_message("user", data.text)
-
-    messages = read_messages()
-    action = decide(data.text, messages)
-
-    if action == DO_NOTHING:
-        reply = "Tohle už jsme řešili."
-    elif action == SUMMARIZE:
-        reply = "Rozumím, připravím shrnutí."
-    elif action == VERIFY:
-        reply = "Tohle si raději ověřím."
-    elif action == STORE_LONG:
-        reply = "Tohle si zapamatuji."
-    else:
-        reply = "OK."
-
-    save_message("assistant", reply)
-
+    reply = run_pipeline(data.text)
     return {
-        "action": action,
-        "assistant": reply,
+        "assistant": reply
     }
 
 
