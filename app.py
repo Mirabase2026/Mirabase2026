@@ -51,6 +51,40 @@ def root():
 def healthz():
     return {"status": "healthy"}
 
+from datetime import datetime
+
+@app.get("/dashboard")
+def dashboard(
+    _: None = Depends(check_api_key)
+):
+    messages = read_messages()
+
+    total = len(messages)
+    short_count = sum(1 for m in messages if m.get("memory_type") == "short")
+    long_count = sum(1 for m in messages if m.get("memory_type") == "long")
+
+    last_summary = None
+    for m in reversed(messages):
+        if (
+            m.get("memory_type") == "long"
+            and isinstance(m.get("content"), str)
+            and m["content"].startswith("SHRNUTÍ:")
+        ):
+            last_summary = {
+                "timestamp": m.get("timestamp"),
+                "preview": m["content"][:120]
+            }
+            break
+
+    return {
+        "status": "ok",
+        "memory": {
+            "total": total,
+            "short": short_count,
+            "long": long_count,
+        },
+        "last_summary": last_summary
+    }
 
 @app.get("/ping")
 def ping():
