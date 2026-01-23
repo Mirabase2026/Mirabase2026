@@ -1,4 +1,5 @@
 # logic.py
+# Core pipeline – clean engine map architecture
 
 import json
 from datetime import datetime, timezone
@@ -8,29 +9,15 @@ from typing import Dict, Any
 from behavior import route as behavior_route
 from intent_router import route_intent
 
-from opinion_engine import run as run_opinion_engine
-from explain_engine import run as run_explain_engine
-from note_engine import run as run_note_engine
-
-from decision import (
-    decide,
-    DecisionResult,
-    RESPOND,
-    VERIFY,
-    SUMMARIZE,
-    DO_NOTHING,
-    STORE_LONG,
-)
-
 # =========================
-# FILE PATHS
+# FILES
 # =========================
 
 MEMORY_FILE = Path("memory.json")
 EXECUTION_LOG_FILE = Path("execution_log.jsonl")
 
 # =========================
-# MEMORY
+# MEMORY (LOW LEVEL)
 # =========================
 
 def save_message(role: str, content: str):
@@ -53,10 +40,13 @@ def save_message(role: str, content: str):
 def read_messages():
     if not MEMORY_FILE.exists():
         return []
-
     with open(MEMORY_FILE, "r", encoding="utf-8") as f:
         return json.load(f).get("messages", [])
 
+
+def clear_memory():
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+        json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
 
 # =========================
 # EXECUTION LOG
@@ -67,12 +57,10 @@ def log_step(action: str, status: str, details: Dict | None = None):
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "action": action,
         "status": status,
-        "details": details
+        "details": details,
     }
-
     with open(EXECUTION_LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-
 
 # =========================
 # PIPELINE
@@ -84,35 +72,26 @@ def run_pipeline(
     source: str = "cli"
 ) -> Dict[str, Any]:
 
+    # ---------------------------------
     # 0) BEHAVIOR (reflex / social / intent)
+    # ---------------------------------
     behavior = behavior_route(user_text)
 
     if behavior is not None:
-        routed = None
+        response = behavior.get("response")
 
+        # INTENT → ENGINE ROUTING
         if behavior.get("action") == "INTENT":
-            routed = route_intent(behavior.get("intent"))
-
-            if routed:
-                engine_context = {
-                    "intent": behavior.get("intent"),
-                    "text": user_text,
-                }
-
-                if routed.get("next") == "OPINION_ENGINE":
-                    result = run_opinion_engine(engine_context)
-                    behavior["response"] = result.get("response")
-
-                elif routed.get("next") == "EXPLAIN_ENGINE":
-                    result = run_explain_engine(engine_context)
-                    behavior["response"] = result.get("response")
-
-                elif routed.get("next") == "NOTE_ENGINE":
-                    result = run_note_engine(engine_context)
-                    behavior["response"] = result.get("response")
+            routed = route_intent(
+                intent=behavior.get("intent"),
+                text=user_text
+            )
+            response = routed.get("response")
+        else:
+            routed = None
 
         return {
-            "response": behavior.get("response"),
+            "response": response,
             "decision": {
                 "action": behavior.get("action"),
                 "intent": behavior.get("intent"),
@@ -125,69 +104,14 @@ def run_pipeline(
             "pipeline": "BEHAVIOR",
         }
 
-    # =====================
-    # DECISION LAYER
-    # =====================
-
-    error = None
-    response = None
-    memory_read = []
-    memory_write = None
-
-    recent_messages = read_messages()
-    memory_read.append("short")
-
-    log_step("DECISION", "start", {"text": user_text})
-    decision: DecisionResult = decide(user_text, recent_messages)
-
-    log_step(
-        "DECISION",
-        "ok",
-        {
-            "action": decision.action,
-            "reflex_type": decision.reflex_type,
-            "memory_action": decision.memory_action,
-        }
-    )
-
-    if decision.action != DO_NOTHING:
-        save_message("user", user_text)
-        memory_write = "short"
-
-    if decision.action == DO_NOTHING:
-        response = None
-
-    elif decision.action in (RESPOND, VERIFY, SUMMARIZE):
-        response = f"[{decision.action.upper()} – odpověď zatím vypnuta]"
-        save_message("assistant", response)
-        memory_write = "short"
-
-    elif decision.action == STORE_LONG:
-        response = "[ULOŽENÍ DO LONG – zatím pouze kandidát]"
-        memory_write = "candidate_long"
-
-    else:
-        error = "unknown_action"
-        log_step("PIPELINE", "error", {"error": error})
-
+    # ---------------------------------
+    # FALLBACK (zatím prázdné)
+    # ---------------------------------
     return {
-        "response": response,
-        "decision": {
-            "action": decision.action,
-            "reflex_type": decision.reflex_type,
-            "memory_action": decision.memory_action,
-        },
-        "memory_read": memory_read,
-        "memory_write": memory_write,
-        "error": error,
-        "pipeline": "DECISION",
+        "response": None,
+        "decision": None,
+        "memory_read": [],
+        "memory_write": None,
+        "error": None,
+        "pipeline": "EMPTY",
     }
-
-
-# =========================
-# CLEAR MEMORY
-# =========================
-
-def clear_memory():
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
