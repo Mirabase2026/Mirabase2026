@@ -1,34 +1,37 @@
 # intent_router.py
+# Central intent → engine routing
 
-def route_intent(intent: str):
-    """
-    Mapuje intent na další logický krok.
-    Zatím žádná AI, žádné odpovědi.
-    """
+from explain_engine import run_explain_engine
+from opinion_engine import run_opinion_engine
+from note_engine import run_note_engine
 
-    if intent == "INTENT_EXPLAIN":
+ENGINE_MAP = {
+    "INTENT_EXPLAIN": {
+        "engine": run_explain_engine,
+    },
+    "INTENT_OPINION": {
+        "engine": run_opinion_engine,
+    },
+    "INTENT_NOTE": {
+        "engine": run_note_engine,
+    },
+}
+
+def route_intent(intent: str, text: str) -> dict:
+    config = ENGINE_MAP.get(intent)
+
+    if not config:
         return {
-            "next": "EXPLAIN_ENGINE"
+            "response": None,
+            "error": "unknown_intent",
+            "next": None,
         }
 
-    if intent == "INTENT_NOTE":
-        return {
-            "next": "NOTE_ENGINE"
-        }
+    engine = config["engine"]
+    result = engine(text)
 
-    if intent == "INTENT_OPINION":
-        return {
-            "next": "OPINION_ENGINE"
-        }
-
-    if intent == "INTENT_CONTINUE":
-        return {
-            "next": "CONTINUE_ENGINE"
-        }
-
-    if intent == "INTENT_META":
-        return {
-            "next": "META_ENGINE"
-        }
-
-    return None
+    return {
+        "next": engine.__name__,
+        "response": result,
+        "error": None,
+    }
