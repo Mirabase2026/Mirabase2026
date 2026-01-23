@@ -6,26 +6,32 @@ def _norm(t: str) -> str:
 
 SOCIAL_RULES = [
     {
-        "patterns": ["hmm", "aha", "no jo", "jasně no", "ok...", "😅", "🙂"],
+        "pattern": r"^(h+m+|hm+)$",
         "action": "NONE",
         "response": None
     },
     {
-        "patterns": ["dobře", "beru", "platí"],
-        "action": "RESPOND",
-        "response": "Dobře."
+        "pattern": r"^(a+ha+)$",
+        "action": "NONE",
+        "response": None
     },
+    {
+        "pattern": r"^ok(\.*)?$",
+        "action": "NONE",
+        "response": None
+    }
 ]
+
 
 def handle(user_input: str):
     text = _norm(user_input)
 
     for rule in SOCIAL_RULES:
-        for p in rule["patterns"]:
-            if p in text:
-                return {
-                    "action": rule["action"],
-                    "response": rule["response"],
-                    "source": "social"
-                }
+        if re.match(rule["pattern"], text):
+            return {
+                "action": rule["action"],
+                "response": rule["response"],
+                "source": "social"
+            }
     return None
+
