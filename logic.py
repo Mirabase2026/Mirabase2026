@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any
+from explain_engine import run as run_explain_engine
 
 from behavior import route as behavior_route
 from intent_router import route_intent
@@ -96,6 +97,12 @@ def run_pipeline(
                     "text": user_text,
                 })
                 behavior["response"] = engine_result.get("response")
+    if routed and routed.get("next") == "EXPLAIN_ENGINE":
+        engine_result = run_explain_engine({
+            "intent": behavior.get("intent"),
+            "text": user_text,
+        })
+        behavior["response"] = engine_result.get("response")
 
         return {
             "response": behavior.get("response"),
