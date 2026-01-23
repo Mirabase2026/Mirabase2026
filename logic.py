@@ -90,16 +90,18 @@ def run_pipeline(
     if behavior is not None:
         # Behavior MUSÍ ukončit pipeline
         return {
-            "response": behavior.get("response"),
-            "decision": {
-                "action": behavior.get("action"),
-                "source": behavior.get("source"),
-            },
-            "memory_read": [],
-            "memory_write": None,
-            "error": None,
-            "pipeline": "BEHAVIOR",
-        }
+    "response": behavior.get("response"),
+    "decision": {
+        "action": behavior.get("action"),
+        "intent": behavior.get("intent"),
+        "source": behavior.get("source"),
+    },
+    "memory_read": [],
+    "memory_write": None,
+    "error": None,
+    "pipeline": "BEHAVIOR",
+}
+
 
     # -------------------------
     # INIT
