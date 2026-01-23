@@ -24,7 +24,8 @@ REFLEX_RULES = [
     }
 ]
 
-def reflex_match(user_input: str):
+def handle(user_input: str):
+    ...
     text = normalize(user_input)
 
     for rule in REFLEX_RULES:
