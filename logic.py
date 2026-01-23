@@ -13,7 +13,7 @@ MEMORY_FILE = Path("memory.json")
 EXECUTION_LOG_FILE = Path("execution_log.jsonl")
 
 # =========================
-# PAMĚŤ (RAM)
+# PAMĚŤ
 # =========================
 def save_message(role: str, content: str):
     data = {"messages": []}
@@ -38,7 +38,7 @@ def read_messages():
         return json.load(f).get("messages", [])
 
 # =========================
-# EXECUTION LOG (AUDIT)
+# EXECUTION LOG
 # =========================
 def log_step(action: str, status: str, details: dict | None = None):
     entry = {
@@ -52,7 +52,7 @@ def log_step(action: str, status: str, details: dict | None = None):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 # =========================
-# OPENROUTER WRAPPER
+# OPENROUTER
 # =========================
 def call_openrouter(messages, model="google/gemini-2.0-flash-exp:free", json_mode=False):
     url = "https://openrouter.ai/api/v1/chat/completions"
@@ -81,7 +81,7 @@ def call_openrouter(messages, model="google/gemini-2.0-flash-exp:free", json_mod
         return {"error": str(e)}
 
 # =========================
-# PLANNER (SCHEDULER)
+# PLANNER
 # =========================
 def plan_steps(user_text: str):
     prompt = [
@@ -112,24 +112,28 @@ def plan_steps(user_text: str):
         steps = plan.get("steps")
         if isinstance(steps, list) and steps:
             return steps
-    except:
+    except Exception:
         pass
 
     return ["REPLY"]
 
 # =========================
-# ACTION ROUTER
+# PIPELINE (CLI READY)
 # =========================
-def run_pipeline(user_text: str):
+def run_pipeline(user_text: str, session: str = "cli", source: str = "cli"):
+    memory_read = []
+    memory_write = None
+    error = None
+    final_reply = None
+
     # 1. Ulož vstup
     save_message("user", user_text)
+    memory_write = "short"
 
     # 2. Planner
     log_step("PLANNER", "start")
     steps = plan_steps(user_text)
     log_step("PLANNER", "ok", {"steps": steps})
-
-    final_reply = None
 
     # 3. Akce
     for step in steps:
@@ -137,44 +141,48 @@ def run_pipeline(user_text: str):
 
         if step == "REPLY":
             history = read_messages()
+            memory_read.append("short")
+
             result = call_openrouter(history)
 
             if "error" in result:
-                log_step(step, "error", {"error": result["error"]})
+                error = result["error"]
+                log_step(step, "error", {"error": error})
                 break
 
             final_reply = result["content"]
             save_message("assistant", final_reply)
+            memory_write = "short"
             log_step(step, "ok")
 
         elif step == "SAVE_LONG":
-            # ZATÍM PLACEHOLDER
             log_step(step, "ok", {"info": "not implemented"})
 
         elif step == "SEARCH_KNOWLEDGE":
-            # ZATÍM PLACEHOLDER
             log_step(step, "ok", {"info": "not implemented"})
 
         elif step == "SUMMARIZE":
-            # ZATÍM PLACEHOLDER
             log_step(step, "ok", {"info": "not implemented"})
 
         else:
-            log_step(step, "error", {"error": "unknown step"})
+            error = "unknown step"
+            log_step(step, "error", {"error": error})
             break
 
-    return final_reply or "Došlo k chybě."
+    # 4. Návrat pro CLI
+    return {
+        "response": final_reply or "Došlo k chybě.",
+        "action": steps,
+        "memory_read": memory_read,
+        "memory_write": memory_write,
+        "error": error
+    }
 
 # =========================
 # CLEAR MEMORY
 # =========================
 def clear_memory():
-    from pathlib import Path
-    import json
-
-    memory_file = Path("memory.json")
-
-    with open(memory_file, "w", encoding="utf-8") as f:
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump({"messages": []}, f, ensure_ascii=False, indent=2)
 
 
