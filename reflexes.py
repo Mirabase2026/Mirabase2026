@@ -7,34 +7,29 @@ def normalize(text: str) -> str:
 
 REFLEX_RULES = [
     {
-        "patterns": ["ahoj", "čau", "cus", "nazdar", "hello", "hi"],
+        "pattern": r"^ahoj$",
         "response": "Ahoj."
     },
     {
-        "patterns": ["jak se máš", "jak se mas", "jak se ti daří"],
+        "pattern": r"^jak se mas$",
         "response": "Mám se dobře."
     },
     {
-        "patterns": ["díky", "dik", "thanks", "thx"],
+        "pattern": r"^diky$",
         "response": "Není zač."
-    },
-    {
-        "patterns": ["ok", "jo", "jasně", "dobře"],
-        "response": "Rozumím."
     }
 ]
 
+
 def handle(user_input: str):
-    ...
     text = normalize(user_input)
 
     for rule in REFLEX_RULES:
-        for p in rule["patterns"]:
-            if p in text:
-                return {
-                    "action": "RESPOND",
-                    "response": rule["response"],
-                    "source": "reflex"
-                }
-
+        if re.match(rule["pattern"], text):
+            return {
+                "action": "RESPOND",
+                "response": rule["response"],
+                "source": "reflex"
+            }
     return None
+
