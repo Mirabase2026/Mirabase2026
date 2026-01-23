@@ -110,6 +110,36 @@ def get_long_memory(
     long_messages = [m for m in messages if m.get("memory_type") == "long"]
     return {"messages": long_messages}
 
+@app.post("/memory/summarize")
+def summarize_memory(
+    _: None = Depends(check_api_key)
+):
+    messages = read_messages()
+
+    # vezmeme posledních 10 zpráv
+    last_messages = messages[-10:]
+
+    if not last_messages:
+        raise HTTPException(status_code=400, detail="No messages to summarize")
+
+    # jednoduché „shrnutí“ – jen slepený text
+    summary_text = " | ".join(
+        f"{m['role']}: {m['content']}" for m in last_messages
+    )
+
+    # uložíme jako long-term poznámku
+    save_message("assistant", f"SHRNUTÍ: {summary_text}")
+
+    # označíme poslední zprávu jako long
+    messages = read_messages()
+    messages[-1]["memory_type"] = "long"
+
+    from pathlib import Path
+    import json
+    with open(Path("memory.json"), "w", encoding="utf-8") as f:
+        json.dump({"messages": messages}, f, indent=2, ensure_ascii=False)
+
+    return {"status": "ok", "summarized_messages": len(last_messages)}
 
 @app.post("/memory/note")
 def add_note(
