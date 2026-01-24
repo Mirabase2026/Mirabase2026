@@ -1,11 +1,10 @@
 # intents.py
+# Intent detection with UX-friendly patterns
+# No AI, pure rules + normalization
 
 import re
 import unicodedata
 
-# =========================
-# NORMALIZACE VSTUPU
-# =========================
 
 def normalize(text: str) -> str:
     text = text.strip().lower()
@@ -16,46 +15,54 @@ def normalize(text: str) -> str:
     return text
 
 
-# =========================
-# INTENT PRAVIDLA
-# =========================
-
 INTENT_RULES = [
-    # ---- EXPLAIN ----
-    (r"^(vysvetli|vysvetli to)$", "INTENT_EXPLAIN"),
-    (r"^(vysvetli vic|rozved to)$", "INTENT_EXPLAIN"),
+    # -------------------------
+    # EXPLAIN
+    # -------------------------
+    (
+        r".*\b(vysvetli|vysvetlit|vysvetlis|muze(s|š) mi vysvetlit|"
+        r"muzes mi vysvetlit|objasni|jak to funguje)\b.*",
+        "INTENT_EXPLAIN",
+    ),
 
-    # ---- NOTES / SUMMARY ----
-    (r"^(udelej poznamky|udelej si poznamky)$", "INTENT_NOTE"),
-    (r"^(shrn|shrni|shrnut)$", "INTENT_NOTE"),
-    (r"^(zapis si to)$", "INTENT_NOTE"),
+    # -------------------------
+    # NOTE / SUMMARY
+    # -------------------------
+    (
+        r".*\b(udelej|udelas|udelat|shr(n|ň)|shrnout|"
+        r"poznamky|stru(c|č)ne|v bodech)\b.*",
+        "INTENT_NOTE",
+    ),
 
-    # ---- CONTINUE ----
-    (r"^(pokracuj|jdeme dal|jedeme dal)$", "INTENT_CONTINUE"),
+    # -------------------------
+    # OPINION
+    # -------------------------
+    (
+        r".*\b(co si myslis|jaky je tvuj nazor|jaky mas nazor|"
+        r"tvuj nazor|myslis si ze)\b.*",
+        "INTENT_OPINION",
+    ),
 
-    # ---- OPINION ----
-    (r"^co si myslis( o.*)?$", "INTENT_OPINION"),
-    (r"^jaky je tvuj nazor( na.*)?$", "INTENT_OPINION"),
-
-    # ---- META / NEXT STEP ----
-    (r"^co s tim( udelame)?$", "INTENT_META"),
+    # -------------------------
+    # CONTINUE
+    # -------------------------
+    (
+        r".*\b(pokracuj|jedem dal|jdeme dal|dalsi|pokra(c|č)uj prosim)\b.*",
+        "INTENT_CONTINUE",
+    ),
 ]
 
-
-# =========================
-# HANDLER
-# =========================
 
 def handle(user_input: str):
     text = normalize(user_input)
 
     for pattern, intent in INTENT_RULES:
-        if re.match(pattern, text):
+        if re.search(pattern, text):
             return {
                 "action": "INTENT",
                 "intent": intent,
                 "response": None,
-                "source": "intent"
+                "source": "intent",
             }
 
     return None
