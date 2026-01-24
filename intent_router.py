@@ -1,5 +1,5 @@
 # intent_router.py
-# Central intent → engine routing (stable)
+# Central intent → engine routing (with minimal context)
 
 import explain_engine
 import opinion_engine
@@ -13,7 +13,7 @@ ENGINE_MAP = {
     "INTENT_CHAT": chat_engine,
 }
 
-def route_intent(intent: str, text: str) -> dict:
+def route_intent(intent: str, text: str, last_assistant_response: str | None = None) -> dict:
     engine_module = ENGINE_MAP.get(intent)
 
     if not engine_module:
@@ -23,7 +23,11 @@ def route_intent(intent: str, text: str) -> dict:
             "next": None,
         }
 
-    response = engine_module.run(text)
+    # chat_engine wants context, others not
+    if intent == "INTENT_CHAT":
+        response = engine_module.run(text, last_assistant_response)
+    else:
+        response = engine_module.run(text)
 
     return {
         "next": engine_module.__name__,
