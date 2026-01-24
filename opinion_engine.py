@@ -1,12 +1,8 @@
 # opinion_engine.py
+# Opinion engine – returns plain text only
 
-def run(context: dict):
-    """
-    První jednoduchý opinion engine.
-    Zatím pevná odpověď – jen důkaz toku.
-    """
-
-    return {
-        "response": "Myslím si, že architektura je navržená správně a má čistý základ.",
-        "source": "opinion_engine"
-    }
+def run(text: str) -> str:
+    return (
+        "Myslím si, že architektura je navržená správně "
+        "a má čistý, rozšiřitelný základ."
+    )
