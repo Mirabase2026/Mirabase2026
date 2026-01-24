@@ -20,8 +20,8 @@ INTENT_RULES = [
     # EXPLAIN
     # -------------------------
     (
-        r".*\b(vysvetli|vysvetlit|vysvetlis|muze(s|š) mi vysvetlit|"
-        r"muzes mi vysvetlit|objasni|jak to funguje)\b.*",
+        r".*\b(vysvetli|vysvetlit|vysvetlis|muzes mi vysvetlit|"
+        r"objasni|jak to funguje)\b.*",
         "INTENT_EXPLAIN",
     ),
 
@@ -29,8 +29,7 @@ INTENT_RULES = [
     # NOTE / SUMMARY
     # -------------------------
     (
-        r".*\b(udelej|udelas|udelat|shr(n|ň)|shrnout|"
-        r"poznamky|stru(c|č)ne|v bodech)\b.*",
+        r".*\b(shrn|shrnut|poznamky|stru(c|č)ne|v bodech)\b.*",
         "INTENT_NOTE",
     ),
 
@@ -38,17 +37,17 @@ INTENT_RULES = [
     # OPINION
     # -------------------------
     (
-        r".*\b(co si myslis|jaky je tvuj nazor|jaky mas nazor|"
-        r"tvuj nazor|myslis si ze)\b.*",
+        r".*\b(co si myslis|jaky je tvuj nazor|tvuj nazor|myslis si ze)\b.*",
         "INTENT_OPINION",
     ),
 
     # -------------------------
-    # CONTINUE
+    # CHAT / CONTINUE
     # -------------------------
     (
-        r".*\b(pokracuj|jedem dal|jdeme dal|dalsi|pokra(c|č)uj prosim)\b.*",
-        "INTENT_CONTINUE",
+        r".*\b(co delas|konkretizuj|rozved|rozvest|pokracuj|"
+        r"a dal|jdeme dal|pokracuj dal)\b.*",
+        "INTENT_CHAT",
     ),
 ]
 
