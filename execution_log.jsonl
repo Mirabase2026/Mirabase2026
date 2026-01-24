@@ -1,0 +1,40 @@
+{"timestamp": "2026-01-23T18:54:50.468525+00:00", "action": "DECISION", "status": "start", "details": {"text": "ahoj"}}
+{"timestamp": "2026-01-23T18:54:50.469280+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T18:55:00.323154+00:00", "action": "DECISION", "status": "start", "details": {"text": "jak se máš?"}}
+{"timestamp": "2026-01-23T18:55:00.324738+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:00:21.416985+00:00", "action": "DECISION", "status": "start", "details": {"text": "Jaký je dnes počasí?"}}
+{"timestamp": "2026-01-23T20:00:21.418767+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:00:50.248854+00:00", "action": "DECISION", "status": "start", "details": {"text": "hm"}}
+{"timestamp": "2026-01-23T20:00:50.249605+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:24:31.586913+00:00", "action": "DECISION", "status": "start", "details": {"text": "Jak se máš?"}}
+{"timestamp": "2026-01-23T20:24:31.587685+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:24:39.986515+00:00", "action": "DECISION", "status": "start", "details": {"text": "Jak se maš"}}
+{"timestamp": "2026-01-23T20:24:39.987205+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:25:04.578278+00:00", "action": "DECISION", "status": "start", "details": {"text": "díky"}}
+{"timestamp": "2026-01-23T20:25:04.579015+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:26:04.378071+00:00", "action": "DECISION", "status": "start", "details": {"text": "co si myslíš o architektuře?"}}
+{"timestamp": "2026-01-23T20:26:04.378812+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T20:26:14.954417+00:00", "action": "DECISION", "status": "start", "details": {"text": "ahoj, jak se máš?"}}
+{"timestamp": "2026-01-23T20:26:14.955159+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:03:41.543072+00:00", "action": "DECISION", "status": "start", "details": {"text": "jak se máš?"}}
+{"timestamp": "2026-01-23T21:03:41.543860+00:00", "action": "DECISION", "status": "ok", "details": {"action": "do_nothing", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:03:59.790928+00:00", "action": "DECISION", "status": "start", "details": {"text": "co děláš?"}}
+{"timestamp": "2026-01-23T21:03:59.791664+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:04:15.406629+00:00", "action": "DECISION", "status": "start", "details": {"text": "dobře"}}
+{"timestamp": "2026-01-23T21:04:15.407364+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:04:25.751336+00:00", "action": "DECISION", "status": "start", "details": {"text": "Jaké je počasí?"}}
+{"timestamp": "2026-01-23T21:04:25.751900+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:04:37.639202+00:00", "action": "DECISION", "status": "start", "details": {"text": "Ahoj, jak se máš?"}}
+{"timestamp": "2026-01-23T21:04:37.639927+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:05:26.006749+00:00", "action": "DECISION", "status": "start", "details": {"text": "jak se ti daří?"}}
+{"timestamp": "2026-01-23T21:05:26.007505+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:05:33.158604+00:00", "action": "DECISION", "status": "start", "details": {"text": "dík"}}
+{"timestamp": "2026-01-23T21:05:33.159339+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:05:39.198503+00:00", "action": "DECISION", "status": "start", "details": {"text": "jasně"}}
+{"timestamp": "2026-01-23T21:05:39.199232+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:05:44.430746+00:00", "action": "DECISION", "status": "start", "details": {"text": "thx"}}
+{"timestamp": "2026-01-23T21:05:44.431467+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:16:15.819882+00:00", "action": "DECISION", "status": "start", "details": {"text": "no"}}
+{"timestamp": "2026-01-23T21:16:15.820719+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}
+{"timestamp": "2026-01-23T21:24:44.369081+00:00", "action": "DECISION", "status": "start", "details": {"text": "děkuji"}}
+{"timestamp": "2026-01-23T21:24:44.369885+00:00", "action": "DECISION", "status": "ok", "details": {"action": "respond", "reflex_type": null, "memory_action": null}}

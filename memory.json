@@ -1,4 +1,194 @@
 {
-  "messages": []
+  "messages": [
+    {
+      "role": "user",
+      "content": "ahoj",
+      "timestamp": "2026-01-23T18:54:50.470430+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T18:54:50.471311+00:00"
+    },
+    {
+      "role": "user",
+      "content": "jak se máš?",
+      "timestamp": "2026-01-23T18:55:00.325666+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T18:55:00.326633+00:00"
+    },
+    {
+      "role": "user",
+      "content": "Jaký je dnes počasí?",
+      "timestamp": "2026-01-23T20:00:21.419842+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:00:21.420821+00:00"
+    },
+    {
+      "role": "user",
+      "content": "hm",
+      "timestamp": "2026-01-23T20:00:50.250540+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:00:50.251543+00:00"
+    },
+    {
+      "role": "user",
+      "content": "Jak se máš?",
+      "timestamp": "2026-01-23T20:24:31.588618+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:24:31.589667+00:00"
+    },
+    {
+      "role": "user",
+      "content": "Jak se maš",
+      "timestamp": "2026-01-23T20:24:39.988087+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:24:39.989098+00:00"
+    },
+    {
+      "role": "user",
+      "content": "díky",
+      "timestamp": "2026-01-23T20:25:04.579877+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:25:04.580941+00:00"
+    },
+    {
+      "role": "user",
+      "content": "co si myslíš o architektuře?",
+      "timestamp": "2026-01-23T20:26:04.379696+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:26:04.380841+00:00"
+    },
+    {
+      "role": "user",
+      "content": "ahoj, jak se máš?",
+      "timestamp": "2026-01-23T20:26:14.956062+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T20:26:14.957304+00:00"
+    },
+    {
+      "role": "user",
+      "content": "co děláš?",
+      "timestamp": "2026-01-23T21:03:59.792585+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:03:59.793745+00:00"
+    },
+    {
+      "role": "user",
+      "content": "dobře",
+      "timestamp": "2026-01-23T21:04:15.408242+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:04:15.409261+00:00"
+    },
+    {
+      "role": "user",
+      "content": "Jaké je počasí?",
+      "timestamp": "2026-01-23T21:04:25.752544+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:04:25.753381+00:00"
+    },
+    {
+      "role": "user",
+      "content": "Ahoj, jak se máš?",
+      "timestamp": "2026-01-23T21:04:37.640918+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:04:37.642098+00:00"
+    },
+    {
+      "role": "user",
+      "content": "jak se ti daří?",
+      "timestamp": "2026-01-23T21:05:26.008386+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:05:26.009585+00:00"
+    },
+    {
+      "role": "user",
+      "content": "dík",
+      "timestamp": "2026-01-23T21:05:33.160206+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:05:33.161458+00:00"
+    },
+    {
+      "role": "user",
+      "content": "jasně",
+      "timestamp": "2026-01-23T21:05:39.200146+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:05:39.201374+00:00"
+    },
+    {
+      "role": "user",
+      "content": "thx",
+      "timestamp": "2026-01-23T21:05:44.432413+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:05:44.433704+00:00"
+    },
+    {
+      "role": "user",
+      "content": "no",
+      "timestamp": "2026-01-23T21:16:15.821724+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:16:15.823135+00:00"
+    },
+    {
+      "role": "user",
+      "content": "děkuji",
+      "timestamp": "2026-01-23T21:24:44.370837+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "[RESPOND – odpověď zatím vypnuta]",
+      "timestamp": "2026-01-23T21:24:44.372180+00:00"
+    }
+  ]
 }
-
