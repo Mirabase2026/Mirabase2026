@@ -4,11 +4,13 @@
 import explain_engine
 import opinion_engine
 import note_engine
+import chat_engine
 
 ENGINE_MAP = {
     "INTENT_EXPLAIN": explain_engine,
     "INTENT_OPINION": opinion_engine,
     "INTENT_NOTE": note_engine,
+    "INTENT_CHAT": chat_engine,
 }
 
 def route_intent(intent: str, text: str) -> dict:
@@ -19,13 +21,6 @@ def route_intent(intent: str, text: str) -> dict:
             "response": None,
             "error": "unknown_intent",
             "next": None,
-        }
-
-    if not hasattr(engine_module, "run"):
-        return {
-            "response": None,
-            "error": "engine_has_no_run",
-            "next": engine_module.__name__,
         }
 
     response = engine_module.run(text)
