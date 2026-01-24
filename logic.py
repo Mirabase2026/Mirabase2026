@@ -1,5 +1,5 @@
 # logic.py
-# Core pipeline with behavior + intent + memory hook (stable)
+# Core pipeline with behavior + intent + memory hook (with DEBUG TAGS)
 
 import json
 from datetime import datetime, timezone
@@ -55,28 +55,24 @@ def run_pipeline(
     source: str = "cli"
 ) -> Dict[str, Any]:
 
-    # ---------------------------------
-    # 0) BEHAVIOR (reflex / social / intent)
-    # ---------------------------------
     behavior = behavior_route(user_text)
 
+    # ---------------------------------
+    # BEHAVIOR MATCH
+    # ---------------------------------
     if behavior is not None:
-        routed = None
         response = behavior.get("response")
+        tag = None
 
-        # -----------------------------
         # INTENT → ENGINE
-        # -----------------------------
         if behavior.get("action") == "INTENT":
             routed = route_intent(
                 behavior.get("intent"),
                 user_text
             )
             response = routed.get("response")
+            tag = "[ENGINE]"
 
-            # -------------------------
-            # MEMORY HOOK (C)
-            # -------------------------
             if behavior.get("intent") in ("INTENT_EXPLAIN", "INTENT_NOTE") and response:
                 save_message(
                     role="assistant",
@@ -84,30 +80,24 @@ def run_pipeline(
                     tag=behavior.get("intent")
                 )
 
+        else:
+            # reflex / social
+            tag = "[REFLEX]"
+
+        if response:
+            response = f"{tag} {response}"
+
         return {
             "response": response,
-            "decision": {
-                "action": behavior.get("action"),
-                "intent": behavior.get("intent"),
-                "routed": routed,
-                "source": behavior.get("source"),
-            },
-            "memory_read": [],
-            "memory_write": behavior.get("intent")
-            if behavior.get("intent") in ("INTENT_EXPLAIN", "INTENT_NOTE")
-            else None,
-            "error": None,
             "pipeline": "BEHAVIOR",
+            "error": None,
         }
 
     # ---------------------------------
-    # FALLBACK (should not happen now)
+    # FALLBACK → MODEL
     # ---------------------------------
     return {
-        "response": None,
-        "decision": None,
-        "memory_read": [],
-        "memory_write": None,
-        "error": "no_behavior_match",
-        "pipeline": "NONE",
+        "response": "[MODEL] (zatím žádný model nepřipojen)",
+        "pipeline": "MODEL",
+        "error": None,
     }
