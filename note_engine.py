@@ -1,18 +1,11 @@
 # note_engine.py
+# Note engine – returns plain text only
 
-def run(context: dict):
-    """
-    Jednoduchý note engine.
-    Zatím statické poznámky – důkaz toku.
-    """
-
-    return {
-        "response": (
-            "Poznámky:\n"
-            "- Architektura je vrstvená.\n"
-            "- Behavior rozpozná záměr.\n"
-            "- Router určí další krok.\n"
-            "- Engine provede konkrétní akci."
-        ),
-        "source": "note_engine"
-    }
+def run(text: str) -> str:
+    return (
+        "Poznámky:\n"
+        "- Architektura je vrstvená.\n"
+        "- Behavior rozpozná záměr.\n"
+        "- Router určí další krok.\n"
+        "- Engine provede konkrétní akci."
+    )
