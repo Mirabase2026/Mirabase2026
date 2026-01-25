@@ -8,17 +8,13 @@ from intents import handle as intent_handle
 
 BEHAVIOR_PIPELINE = [
     social_handle,     # silence + affect
-    greeting_handle,   # heuristic greeting (dictionary-based)
+    greeting_handle,   # greeting (semantic, subtype-aware)
     reflex_handle,     # hard reflexes
     intent_handle,     # intents → engines
 ]
 
 
 def route(user_input: str):
-    """
-    Spustí behaviorální vrstvy v daném pořadí
-    a vrátí první match, jinak None.
-    """
     for handler in BEHAVIOR_PIPELINE:
         result = handler(user_input)
         if result is not None:
