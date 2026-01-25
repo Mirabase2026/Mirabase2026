@@ -1,14 +1,18 @@
 # behavior.py
 
-from reflexes import handle as reflex_handle
 from social import handle as social_handle
+from greeting import handle as greeting_handle
+from reflexes import handle as reflex_handle
 from intents import handle as intent_handle
 
+
 BEHAVIOR_PIPELINE = [
-    reflex_handle,
-    social_handle,
-    intent_handle,
+    social_handle,     # silence + affect
+    greeting_handle,   # heuristic greeting (dictionary-based)
+    reflex_handle,     # hard reflexes
+    intent_handle,     # intents → engines
 ]
+
 
 def route(user_input: str):
     """
