@@ -1,13 +1,17 @@
 # greeting.py
-# Heuristic greeting detection + dictionary-based response
-# No model, no memory, semantic-ish classification
+# Heuristic greeting classification with subtypes
+# No model, no memory
 
 import random
 import re
 import unicodedata
 from typing import Optional
 
-from greeting_phrases import BASIC_GREETINGS, GREETINGS_WITH_CONTACT
+from greeting_phrases import (
+    GREETING_SIMPLE,
+    GREETING_WITH_QUESTION,
+    GREETING_CONTACT_QUESTION,
+)
 
 
 def normalize(text: str) -> str:
@@ -19,92 +23,74 @@ def normalize(text: str) -> str:
     return text
 
 
-# greeting-like tokens (normalized)
 GREETING_TOKENS = {
     "ahoj",
     "cau",
-    "caau",
     "nazdar",
     "zdar",
     "zdravim",
-    "zdravicko",
     "cus",
-    "cusik",
     "dobry",
-    "dobre",
 }
 
-# strong greeting phrases
-GREETING_PHRASES = {
-    "dobry den",
-    "dobre rano",
-    "dobry vecer",
-}
-
-# contact cues (greeting + contact)
-CONTACT_CUES = {
+QUESTION_WORDS = {
     "jak",
+    "co",
+    "delas",
     "mas",
     "mate",
     "dari",
     "jde",
-    "co",
-    "delas",
-    "chvilku",
-    "jsi",
-    "tu",
-    "slysis",
 }
 
 
-def _looks_like_greeting(text_norm: str) -> bool:
-    if not text_norm:
+def _looks_like_greeting(words: list[str]) -> bool:
+    if not words:
         return False
 
-    words = text_norm.split()
-
-    # too long → not greeting
     if len(words) > 8:
         return False
 
-    joined = " ".join(words)
-
-    # strong phrases
-    if joined in GREETING_PHRASES:
+    if words[0] in GREETING_TOKENS:
         return True
 
-    # start token
-    first = words[0]
-    if first in GREETING_TOKENS:
-        return True
-
-    # first two tokens
-    if len(words) >= 2 and f"{words[0]} {words[1]}" in GREETING_PHRASES:
-        return True
-
-    # very short with greeting token anywhere
     if len(words) <= 3 and any(w in GREETING_TOKENS for w in words):
         return True
 
     return False
 
 
-def _prefer_contact_reply(text_norm: str) -> bool:
-    words = set(text_norm.split())
-    return any(w in CONTACT_CUES for w in words)
+def _is_question(words: list[str]) -> bool:
+    return any(w in QUESTION_WORDS for w in words)
 
 
 def handle(user_input: str) -> Optional[dict]:
     text = normalize(user_input)
+    words = text.split()
 
-    if not _looks_like_greeting(text):
+    if not _looks_like_greeting(words):
         return None
 
-    pool = GREETINGS_WITH_CONTACT if _prefer_contact_reply(text) else BASIC_GREETINGS
-    response = random.choice(pool)
+    # GREETING + QUESTION
+    if _is_question(words):
+        # "jak se máš" style
+        if "mas" in words or "mate" in words:
+            response = random.choice(GREETING_WITH_QUESTION)
+        else:
+            # "co děláš", "jsi tu" apod.
+            response = random.choice(GREETING_CONTACT_QUESTION)
+
+        return {
+            "action": "RESPOND",
+            "response": response,
+            "source": "greeting_question",
+        }
+
+    # SIMPLE GREETING
+    response = random.choice(GREETING_SIMPLE)
 
     return {
         "action": "RESPOND",
         "response": response,
-        "source": "greeting",
+        "source": "greeting_simple",
     }
