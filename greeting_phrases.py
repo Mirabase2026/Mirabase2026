@@ -1,7 +1,8 @@
 # greeting_phrases.py
-# Static greeting responses (time-neutral, no model, no memory)
+# Greeting response pools (time-neutral, no model, no memory)
 
-GREETING_SIMPLE = [
+# Simple greeting → simple reply
+BASIC_GREETINGS = [
     "Ahoj.",
     "Čau.",
     "Nazdar.",
@@ -9,15 +10,12 @@ GREETING_SIMPLE = [
     "Dobrý den.",
 ]
 
-GREETING_WITH_QUESTION = [
+# Greeting + question from user → MUST answer + optionally return question
+GREETINGS_WITH_CONTACT = [
     "Mám se dobře, díky. A ty?",
     "Docela fajn. Jak se máš ty?",
     "V pohodě. Jak je to u tebe?",
     "Jde to dobře. Jak se máš?",
-]
-
-GREETING_CONTACT_QUESTION = [
     "Teď jsem tady. Co máš na mysli?",
     "Jsem tu, povídej.",
-    "Teď řeším to, co píšeš.",
 ]
