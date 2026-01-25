@@ -7,10 +7,10 @@ from intents import handle as intent_handle
 
 
 BEHAVIOR_PIPELINE = [
-    social_handle,     # silence + affect
-    greeting_handle,   # greeting (semantic, subtype-aware)
-    reflex_handle,     # hard reflexes
-    intent_handle,     # intents → engines
+    social_handle,
+    greeting_handle,
+    reflex_handle,
+    intent_handle,
 ]
 
 
