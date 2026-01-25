@@ -1,17 +1,13 @@
 # greeting.py
-# Heuristic greeting classification with subtypes
-# No model, no memory
+# Heuristic greeting detection (semantic, subtype-aware)
+# Uses existing greeting_phrases exports
 
 import random
 import re
 import unicodedata
 from typing import Optional
 
-from greeting_phrases import (
-    GREETING_SIMPLE,
-    GREETING_WITH_QUESTION,
-    GREETING_CONTACT_QUESTION,
-)
+from greeting_phrases import BASIC_GREETINGS, GREETINGS_WITH_CONTACT
 
 
 def normalize(text: str) -> str:
@@ -41,6 +37,8 @@ QUESTION_WORDS = {
     "mate",
     "dari",
     "jde",
+    "jsi",
+    "tu",
 }
 
 
@@ -51,16 +49,18 @@ def _looks_like_greeting(words: list[str]) -> bool:
     if len(words) > 8:
         return False
 
+    # greeting at start
     if words[0] in GREETING_TOKENS:
         return True
 
+    # short message containing greeting token
     if len(words) <= 3 and any(w in GREETING_TOKENS for w in words):
         return True
 
     return False
 
 
-def _is_question(words: list[str]) -> bool:
+def _has_question(words: list[str]) -> bool:
     return any(w in QUESTION_WORDS for w in words)
 
 
@@ -71,24 +71,17 @@ def handle(user_input: str) -> Optional[dict]:
     if not _looks_like_greeting(words):
         return None
 
-    # GREETING + QUESTION
-    if _is_question(words):
-        # "jak se máš" style
-        if "mas" in words or "mate" in words:
-            response = random.choice(GREETING_WITH_QUESTION)
-        else:
-            # "co děláš", "jsi tu" apod.
-            response = random.choice(GREETING_CONTACT_QUESTION)
-
+    # Greeting + question → answer appropriately
+    if _has_question(words):
+        response = random.choice(GREETINGS_WITH_CONTACT)
         return {
             "action": "RESPOND",
             "response": response,
             "source": "greeting_question",
         }
 
-    # SIMPLE GREETING
-    response = random.choice(GREETING_SIMPLE)
-
+    # Simple greeting
+    response = random.choice(BASIC_GREETINGS)
     return {
         "action": "RESPOND",
         "response": response,
