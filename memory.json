@@ -1,4 +1,7 @@
 {
+  "personal": {
+    "name": "Roman"
+  },
   "messages": [
     {
       "role": "user",
