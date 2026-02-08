@@ -1,45 +1,61 @@
 # =========================
-# MIRA BASE – RESPONSE SOURCE ROUTER (v1)
+# MIRA BASE – RESPONSE SOURCE ROUTER
 # =========================
 #
 # Responsibilities:
-# - decide WHERE the response should come from (source selection)
-# - NO text, NO generation, NO facts
-# - purely routing signals
+# - choose response source deterministically
+# - consider actions, attention, entities
+# - apply emotion-aware routing (v1)
 #
-# Sources (v1):
-# - STATIC: deterministic short responses / social libs (future)
-# - DETERMINISTIC: fact engines / calculators
-# - MEMORY: LTM / personal facts (future)
-# - GENERATIVE: model / chat engine (future)
+# Sources:
+# - DETERMINISTIC
+# - SOCIAL
+# - FALLBACK
 #
-# Note: v1 is intentionally conservative and minimal.
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 
-FACT_ACTIONS = {"TIME_NOW", "DAY_TODAY", "DATE_TODAY", "ARITHMETIC"}
+def _get_emotion(ctx: Dict[str, Any]) -> Optional[str]:
+    if isinstance(ctx, dict):
+        emo = ctx.get("emotion")
+        if isinstance(emo, dict):
+            sig = emo.get("emotion_signal")
+            if isinstance(sig, str):
+                return sig
+    return None
 
 
 def resolve_response_source(
     *,
-    actions: List[str],
+    actions: List[Any],
     attention: Dict[str, Any],
     entities: Dict[str, Any],
     context: Dict[str, Any],
 ) -> Dict[str, Any]:
-    # 1) Deterministic facts always win
-    if any(a in FACT_ACTIONS for a in actions):
-        return {"source": "DETERMINISTIC", "reason": "FACT_ACTION"}
+    """
+    Decide which response source to use.
+    Deterministic, emotion-aware (v1).
+    """
+    emotion = _get_emotion(context)
+    primary_intent = attention.get("primary_intent")
 
-    # 2) Memory-based responses (placeholder for future)
-    #    (we keep it conservative; activate later when memory intents/actions exist)
-    if actions and any(a.startswith("MEMORY_") for a in actions):
-        return {"source": "MEMORY", "reason": "MEMORY_ACTION"}
+    # -------------------------------------------------
+    # 1) SOCIAL ROUTE (greetings, social turns)
+    # -------------------------------------------------
+    if primary_intent == "GREETING":
+        # Emotion-aware preference for social handling
+        if emotion in ("CALM", "CONFUSED", "ENGAGED"):
+            return {"source": "SOCIAL"}
 
-    # 3) Generative fallback (future model)
-    if "MODEL_FALLBACK" in actions:
-        return {"source": "GENERATIVE", "reason": "MODEL_FALLBACK"}
+    # -------------------------------------------------
+    # 2) DETERMINISTIC FACTS
+    # -------------------------------------------------
+    if actions:
+        # When frustrated, still allow deterministic answers
+        return {"source": "DETERMINISTIC"}
 
-    # 4) Default: STATIC/SOCIAL deterministic response path
-    return {"source": "STATIC", "reason": "DEFAULT"}
+    # -------------------------------------------------
+    # 3) FALLBACK
+    # -------------------------------------------------
+    return {"source": "FALLBACK"}

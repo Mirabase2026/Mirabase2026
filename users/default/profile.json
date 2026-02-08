@@ -1,0 +1,32 @@
+{
+  "user_id": "roman_01",
+
+  "identity": {
+    "role": "owner",
+    "status": "active",
+    "name": "Roman",
+    "display_name": "Stvořitel"
+  },
+
+  "access": {
+    "allowed_actions": ["*"],
+    "denied_actions": [],
+    "restricted_to_self": true,
+    "daily_limit": -1,
+    "access_level": 10,
+    "max_credits": -1
+  },
+
+  "preferences": {
+    "verbosity": 1,
+    "response_language": "cs",
+    "communication_style": "technical"
+  },
+
+  "temporal": null,
+
+  "meta": {
+    "created_at": "2026-02-08",
+    "profile_version": "0.1"
+  }
+}

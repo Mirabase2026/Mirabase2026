@@ -1,87 +1,97 @@
+# ltm.py
 # =========================
-# MIRA BASE – LONG TERM MEMORY (LTM)
+# MIRA BASE – LTM v2.2 (BACKWARD COMPATIBLE)
 # =========================
-#
-# Responsibilities:
-# - load and persist long-term memory
-# - expose PERSONAL FACTS separately from message history
-#
-# This module is the single source of truth for memory.json structure.
-#
-# Backward compatible:
-# - provides store_fact() expected by personal_fact_engine.py
+
+from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict, Optional
 
+
+# -------------------------------------------------
+# PATHS
+# -------------------------------------------------
 MEMORY_FILE = Path("memory.json")
 
 
-def load_ltm() -> Dict[str, Any]:
+def _profile_path(user_id: str) -> Path:
+    return Path("users") / user_id / "profile.json"
+
+
+# -------------------------------------------------
+# LTM CORE
+# -------------------------------------------------
+def load_ltm(user_id: Optional[str] = None) -> Dict[str, Any]:
     """
-    Loads PERSONAL FACTS from memory.json.
-
-    Expected structure:
-    {
-      "personal": {...},
-      "messages": [...]
-    }
-
-    Returns ONLY the personal dict.
+    Backward compatible:
+    - load_ltm() -> full LTM
+    - load_ltm(user_id) -> user-specific LTM
     """
     if not MEMORY_FILE.exists():
-        return {}
-
-    try:
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception:
-        return {}
-
-    personal = data.get("personal")
-    if isinstance(personal, dict):
-        return personal
-
-    return {}
-
-
-def save_personal_fact(key: str, value: Any) -> None:
-    """
-    Persist a single personal fact into memory.json.
-    """
-    data: Dict[str, Any] = {}
-
-    if MEMORY_FILE.exists():
+        data = {"ltm": {}}
+    else:
         try:
             with open(MEMORY_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
+            if not isinstance(data, dict):
+                data = {"ltm": {}}
         except Exception:
-            data = {}
+            data = {"ltm": {}}
 
-    if not isinstance(data, dict):
-        data = {}
+    if user_id is None:
+        return data
 
-    personal = data.get("personal")
-    if not isinstance(personal, dict):
-        personal = {}
+    return data.get("ltm", {}).get(user_id, {})
 
-    personal[key] = value
-    data["personal"] = personal
 
-    # ensure messages key exists
-    if "messages" not in data or not isinstance(data["messages"], list):
-        data["messages"] = []
-
+def save_ltm(data: Dict[str, Any]) -> None:
     with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-# -------------------------------------------------
-# BACKWARD COMPATIBILITY
-# -------------------------------------------------
-def store_fact(key: str, value: Any) -> None:
+def upsert_fact(user_id: str, key: str, value: Any) -> None:
     """
-    Alias for legacy imports.
+    Legacy API – used by personal_fact_engine
     """
-    save_personal_fact(key, value)
+    data = load_ltm()
+    data.setdefault("ltm", {})
+    data["ltm"].setdefault(user_id, {})
+    data["ltm"][user_id][key] = value
+    save_ltm(data)
+
+
+# -------------------------------------------------
+# PREFERENCES WRITE (v2)
+# -------------------------------------------------
+def set_preference(user_id: str, key: str, value: Any) -> bool:
+    path = _profile_path(user_id)
+
+    if not path.exists():
+        return False
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            profile = json.load(f)
+        if not isinstance(profile, dict):
+            return False
+
+        profile[key] = value
+
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(profile, f, ensure_ascii=False, indent=2)
+
+        return True
+    except Exception:
+        return False
+
+
+def set_preferences(user_id: str, updates: Dict[str, Any]) -> bool:
+    if not isinstance(updates, dict):
+        return False
+
+    ok = True
+    for k, v in updates.items():
+        ok = ok and set_preference(user_id, k, v)
+    return ok

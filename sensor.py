@@ -79,7 +79,7 @@ def sense(text: str, context: Optional[Dict[str, Any]] = None) -> SensorResult:
     # -------------------------
     # GREETINGS
     # -------------------------
-    if _has(text_n, r"\b(ahoj|nazdar|čau|cau|zdravím|zdravim)\b"):
+    if _has(text_n, r"\b(ahoj|nazdar|čau|cau|zdravím|zdravim|dobrý den|dobry den)\b"):
         signals.append("GREETING")
 
     # -------------------------
@@ -87,6 +87,18 @@ def sense(text: str, context: Optional[Dict[str, Any]] = None) -> SensorResult:
     # -------------------------
     if _has(text_n, r"\b(dík|dik|díky|diky|děkuju|dekuju|děkuji|dekuji)\b"):
         signals.append("THANKS")
+
+    # -------------------------
+    # BYE
+    # -------------------------
+    if _has(text_n, r"\b(zatím|zatim|měj se|mej se|na shledanou|nashle|dobrou)\b"):
+        signals.append("BYE")
+
+    # -------------------------
+    # ACK
+    # -------------------------
+    if _has(text_n, r"\b(ok|okej|okey|jasně|jasne|rozumím|rozumim|chápu|chapu|beru|platí|plati)\b"):
+        signals.append("ACK")
 
     # -------------------------
     # USER-STATE (EPISTEMIC LIMIT)

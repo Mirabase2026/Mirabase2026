@@ -1,45 +1,69 @@
 # =========================
-# MIRA BASE – SHORT TERM MEMORY
+# MIRA BASE – SHORT TERM MEMORY (STM v2)
 # =========================
 #
-# Responsibilities:
-# - keep short-term interaction signals
-# - expose minimal recent history for meta-cognition
+# Scope:
+# - per-user isolation
+# - FIFO buffer with fixed limit
+# - meaning-only (no text, no facts, no emotion)
 #
 
-from typing import Dict, Any, Optional, List
+from __future__ import annotations
 
-_STM: Optional[Dict[str, Any]] = None
-_HISTORY_LIMIT = 5
+from typing import Dict, Any, List, Optional
 
-
-def update_stm(result: Dict[str, Any]) -> None:
-    global _STM
-
-    if _STM is None:
-        _STM = {
-            "last_intents": [],
-            "last_actions": [],
-            "last_entities": {},
-            "history": [],
-        }
-
-    # --- history (for META) ---
-    entry = {
-        "pipeline": result.get("pipeline"),
-        "actions": result.get("actions", []),
-    }
-
-    _STM["history"].append(entry)
-    if len(_STM["history"]) > _HISTORY_LIMIT:
-        _STM["history"] = _STM["history"][-_HISTORY_LIMIT:]
-
-    # --- existing FACT behavior preserved ---
-    if result.get("pipeline") == "FACT":
-        _STM["last_intents"] = [result.get("intent")]
-        _STM["last_actions"] = result.get("actions", [])
-        _STM["last_entities"] = result.get("entities", {})
+# In-memory store
+_STM: Dict[str, List[Dict[str, Any]]] = {}
 
 
-def get_stm() -> Optional[Dict[str, Any]]:
-    return _STM
+# -------------------------------------------------
+# PUBLIC API
+# -------------------------------------------------
+def clear_all() -> None:
+    _STM.clear()
+
+
+def clear_user(user_id: str) -> None:
+    if user_id in _STM:
+        _STM[user_id] = []
+
+
+def append_entry(entry: Dict[str, Any], limit: int = 10) -> None:
+    """
+    Appends a single STM entry for a user.
+    Enforces FIFO with fixed limit.
+    """
+    user_id = entry.get("user_id")
+    if not isinstance(user_id, str) or not user_id:
+        return
+
+    bucket = _STM.get(user_id)
+    if not isinstance(bucket, list):
+        bucket = []
+
+    bucket.append(entry)
+
+    # FIFO trim
+    if isinstance(limit, int) and limit > 0:
+        excess = len(bucket) - limit
+        if excess > 0:
+            bucket = bucket[excess:]
+
+    _STM[user_id] = bucket
+
+
+def get_last(user_id: str, n: int) -> List[Dict[str, Any]]:
+    """
+    Returns last n entries for user (chronological order).
+    """
+    if not isinstance(user_id, str) or not user_id:
+        return []
+
+    bucket = _STM.get(user_id)
+    if not isinstance(bucket, list) or not bucket:
+        return []
+
+    if not isinstance(n, int) or n <= 0:
+        return []
+
+    return bucket[-n:]

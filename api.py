@@ -1,44 +1,24 @@
 # api.py
 # =========================
-# MIRA BASE – API LAYER
+# MIRA BASE – API (v7)
 # =========================
-# Minimal FastAPI wrapper
-# Brain + Execution already tested via Golden Tests
-# This file only exposes HTTP interface
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from ltm import set_preference
 
-import logic
-import execution_layer
-
-
-app = FastAPI(title="MiraBase API", version="1.0")
+app = FastAPI()
 
 
-# --------
-# Schemas
-# --------
-
-class InputRequest(BaseModel):
-    text: str
+class PreferenceUpdate(BaseModel):
+    user_id: str
+    key: str
+    value: object
 
 
-class OutputResponse(BaseModel):
-    output: str
-
-
-# --------
-# Routes
-# --------
-
-@app.post("/run", response_model=OutputResponse)
-def run_text(req: InputRequest):
-    contract = logic.run(req.text)
-    output_text = execution_layer.render(contract)
-    return OutputResponse(output=output_text)
-
-
-@app.get("/health")
-def health():
+@app.post("/user/preference")
+def update_preference(body: PreferenceUpdate):
+    ok = set_preference(body.user_id, body.key, body.value)
+    if not ok:
+        raise HTTPException(status_code=400, detail="Preference update failed")
     return {"status": "ok"}
